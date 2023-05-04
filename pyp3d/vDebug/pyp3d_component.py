@@ -420,7 +420,7 @@ class Primitives(Graphics):
 # ------------------------------------------------------------------------------------------
 
 
-class Point(Primitives):
+class GePoint(Primitives):
     def __init__(self, *args):
         Primitives.__init__(self)
         self.representation = 'Point'

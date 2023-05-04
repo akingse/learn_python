@@ -98,7 +98,7 @@ def get_matrix_from_points(points: list, is2D=True) -> GeTransform:  # 用多个
     return GeTransform() if (is_two_dimensional_matrix(forwM) and is2D) else forwM
 
 
-def get_arc_from_three_points(args):  # 用且仅用3个点生成圆弧（矩阵和圆弧角）
+def get_arc_from_three_points(args:list)->tuple:  # 用且仅用3个点生成圆弧（矩阵和圆弧角）
     args = copy.deepcopy(args)
     if len(args) != 3:
         raise TypeError("get_arc_from_three_points number error!")

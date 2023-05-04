@@ -1,4 +1,4 @@
-### this is a markdown
+# This is a markdown
 
 ```python
 
@@ -45,6 +45,23 @@
                        `=---='
 '''
 
+
+
+```
+
+
+
+python安装第三方库
+
+```shell
+#矩阵计算
+pip install numpy
+
+#几何库
+pip install geos
+pip install shapely
+
+#注意禁用代理
 
 
 ```

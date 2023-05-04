@@ -181,8 +181,8 @@ is_vertical = is_perpendi
 
 # pyp3d_component
 combine = Combine
-LineString = Line
-PointString = Point
+GeLineString = Line
+PointString = GePoint
 # pyp3d_matrix
 rotation = rotate
 translate = trans

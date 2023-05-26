@@ -94,6 +94,8 @@ def arc_of_radius_points_2D(pStart: GeVec2d, pEnd: GeVec2d, R: float) -> Arc:
     pCenter = transM*GeVec3d(d/2, R*cos(thetaScope), 0)
     theta = atan2(p1.y-pCenter.y, p1.x-pCenter.x)
     return trans(pCenter)*scale(abs(R))*rotz(theta)*Arc(2*thetaScope)
+
+
 arc_of_radius_points = arc_of_radius_points_2D
 
 # 三点组成线段，倒角圆弧
@@ -130,7 +132,7 @@ def arc_of_tangent_radius_2D(posVec: PosVec, R: float, scope: float) -> Arc:
     # yc=pos.y+R*cos(theta)
     pCenter = GeVec3d(pos.x-R*sin(theta), pos.y+R * cos(theta))
     return trans(pCenter)*scale(abs(R))*rotz(atan2(pos.y-pCenter.y, pos.x-pCenter.x))*Arc(scope)
-    temp_arc = trans(point)*rotz(pi-angle)*trans(-R,0,0)*scale(R)*Arc(-scope)
+    # temp_arc = trans(point)*rotz(pi-angle)*trans(-R, 0, 0)*scale(R)*Arc(-scope)
 
 
 # 用5个点生成椭圆

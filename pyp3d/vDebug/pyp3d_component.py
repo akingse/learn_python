@@ -553,11 +553,11 @@ class Arc(Primitives):
     def isCircle(self):
         axisx = get_matrixs_axisx(self.transformation)
         axisy = get_matrixs_axisy(self.transformation)
-        return True if (abs(norm(axisx)-norm(axisy)) < PL_A and abs(dot(axisx, axisy)) < PL_A) else False
+        return abs(norm(axisx)-norm(axisy)) < PL_A and abs(dot(axisx, axisy)) < PL_A
 
     @property
     def isFull(self):
-        return True if abs(abs(self.scope)-2*pi) < PL_A else False
+        return abs(abs(self.scope)-2*pi) < PL_A
 
 
 class Line(Primitives):
@@ -622,7 +622,7 @@ class Section(Primitives):
 
     def _is_parts_locate_on_plane(self, param, plane: GeTransform) -> bool:
         if isinstance(param, (GeVec2d, GeVec3d)):
-            return True if(is_point_on_plane(to_vec3(param), plane)) else False
+            return is_point_on_plane(to_vec3(param), plane)
         elif isinstance(param, Arc):
             return is_two_dimensional_matrix(inverse_orth(plane)*get_orthogonal_matrix(param.transformation, True))
         elif isinstance(param, SplineCurve):
@@ -1212,12 +1212,13 @@ class Polyface(Primitives):  # 三角面片
         with open(filePath) as file:
             line = file.readline()
             while line:
+                line = line.replace('\n', '')
                 strs = line.split(" ")
                 if strs[0] == "v":
                     vertexListO.append(
-                        GeVec3d(float(strs[-3]), float(strs[-2]), float(strs[-1][0:-1])))
+                        10000*GeVec3d(float(strs[1]), float(strs[2]), float(strs[3])))
                 if strs[0] == "f":
-                    for i in range(1, len(strs)-1):
+                    for i in range(1, len(strs)):
                         faces = strs[i].split("/")
                         faceListO.append(int(faces[0]))
                     faceListO.append(int(0))

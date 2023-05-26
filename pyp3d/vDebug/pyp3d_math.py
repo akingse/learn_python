@@ -11,22 +11,28 @@ from random import *
 # ------------------------------------------------------------------------------------------
 
 
-def atan_posi(y, x)->float: return atan2(y, x) if atan2(
-    y, x) >= 0 else atan2(y, x)+2*pi
+def atan_posi(y, x) -> float:
+    return atan2(y, x) if atan2(y, x) >= 0 else atan2(y, x)+2*pi
 
 
-def appro_angle(x)->float: return 0 if abs(x) < PL_A or abs(abs(x)-2*pi) < PL_A else x
+def appro_angle(x) -> float:
+    return 0 if abs(x) < PL_A or abs(abs(x)-2*pi) < PL_A else x
 
 
 # 浮点数取整
-def appro_zero(num)->float: return round(num/PL_E6)*PL_E6 if abs(abs(num /
-                                                             PL_E6)-round(abs(num/PL_E6))) <= PL_A/PL_E6 else num
-def appro_num(num)->float:
-    numA=abs(round(num)-num)
-    return round(num) if (numA)<PL_E6 else num
+def appro_zero(num) -> float:
+    return round(num/PL_E6)*PL_E6 if abs(abs(num /
+                                             PL_E6)-round(abs(num/PL_E6))) <= PL_A/PL_E6 else num
 
-def appro_vector(vector): return GeVec3d(appro_num(vector.x), appro_num(vector.y), appro_num(
-    vector.z)) if isinstance(vector, GeVec3d) else GeVec3d(appro_num(vector.x), appro_num(vector.y))
+
+def appro_num(num) -> float:
+    numA = abs(round(num)-num)
+    return round(num) if (numA) < PL_E6 else num
+
+
+def appro_vector(vector):
+    return GeVec3d(appro_num(vector.x), appro_num(vector.y), appro_num(
+        vector.z)) if isinstance(vector, GeVec3d) else GeVec3d(appro_num(vector.x), appro_num(vector.y))
 
 
 def appro_matrix(m: GeTransform) -> GeTransform:
@@ -41,7 +47,7 @@ def appro_matrix(m: GeTransform) -> GeTransform:
 def is_float_zero(num: float, eps=PL_A) -> bool:
     if not bool(eps):
         return not bool(num)  # manual set math 0
-    return (abs(num) < eps)  # default
+    return abs(num) < eps  # default
 
 
 def is_float_equal(numA: float, numB: float, eps=0.0) -> bool:
@@ -49,54 +55,52 @@ def is_float_equal(numA: float, numB: float, eps=0.0) -> bool:
         # default
         maxl = abs(numA) if abs(numA) > abs(numB) else abs(numB)
         return abs(numA - numB) < (maxl+1) * PL_A
-    return (abs(numA - numB) <= eps)
+    return abs(numA - numB) <= eps
 
 
 def math_sign(x) -> float:  # sign符号函数
     if abs(x) < PL_A:
         return 0.0
-    return float(1) if (x.real > 0) else float(-1)
+    return float(1.0) if (x.real > 0) else float(-1.0)
 
 
 # override base math funciton, to avoid floating devition.
 def math_sqrt(x) -> float:
-    if abs(x) < PL_A:
-        return 0.0
-    else:
-        return sqrt(x)
+    return float(0.0) if (abs(x) < PL_A) else sqrt(x)
 
 
 # pythagoras theorem
-def math_pytha(a, b)->float: return sqrt(a*a+b*b)
+def math_pytha(a, b) -> float:
+    return sqrt(a*a+b*b)
 
 # ------------------------------------------------------------------------------------------
 # |                                         TRIGON                                         |
 # ------------------------------------------------------------------------------------------
 
 
-def angle_posi(theta)->float: return theta+2 * \
-    pi if theta < 0 else theta  # 弧度强转 0->2*pi
+def angle_posi(theta) -> float:
+    return theta+2 * pi if theta < 0 else theta  # 弧度强转 0->2*pi
 
 
-def angle_nega(theta)->float: return theta-2 * \
-    pi if theta > 0 else theta  # 弧度强转 -2*pi->0
+def angle_nega(theta) -> float:
+    return theta-2 * pi if theta > 0 else theta  # 弧度强转 -2*pi->0
 
 
 def math_acos(x) -> float:
-    if abs(x-1) < PL_A:
+    if abs(x-1.0) < PL_A:
         return 0.0
-    elif abs(x+1) < PL_A:
+    elif abs(x+1.0) < PL_A:
         return pi
     else:
         return acos(x)
 
 
-def arc_theta2alpha(theta, a, b)->float:  # 圆心角转扫掠角
+def arc_theta2alpha(theta, a, b) -> float:  # 圆心角转扫掠角
     # alpha means oval point angle
     return atan2(b*sin(theta), a*cos(theta))  # alpha
 
 
-def arc_alpha2theta(alpha, a, b)->float:  # 扫掠角转圆心角
+def arc_alpha2theta(alpha, a, b) -> float:  # 扫掠角转圆心角
     # theta means circle central angle
     return atan2(a*sin(alpha), b*cos(alpha))  # theta
 
@@ -166,8 +170,8 @@ def math_cardano_formula(a, b, c, d, realRoot=True) -> list:  # 卡尔丹公式�
     else:
         u = (-q/2+math_imag_sqrt(delta))**(1/3)
         v = (-q/2-math_imag_sqrt(delta))**(1/3)
-    omega = complex(-1, sqrt(3))/2
-    omega2 = complex(-1, -sqrt(3))/2
+    omega = complex(-1.0, sqrt(3))/2
+    omega2 = complex(-1.0, -sqrt(3))/2
     x1 = u+v-b/3
     x2 = omega*u+omega2*v-b/3
     x3 = omega2*u+omega*v-b/3
@@ -185,7 +189,7 @@ def math_ferrari_formula(a, b, c, d, e, realRoot=True) -> list:  # 费拉里公�
     c1 = c/a
     d1 = d/a
     e1 = e/a  # a1=1
-    a = -1
+    a = -1.0
     b = c1
     c = (4*e1-b1*d1)
     d = d1**2-e1*(4*c1-b1**2)
@@ -214,7 +218,7 @@ def math_ferrari_formula(a, b, c, d, e, realRoot=True) -> list:  # 费拉里公�
     return rootR if realRoot else rootC
 
 
-def math_bisection_method(func: FunctionType, a, b, accu=PL_E6)->float:  # 二分法求数值解
+def math_bisection_method(func: FunctionType, a: float, b: float, accu=PL_E6) -> float:  # 二分法求数值解
     # func(x)==0
     c = (a + b) / 2.0
     while(abs(func(c)) > accu):

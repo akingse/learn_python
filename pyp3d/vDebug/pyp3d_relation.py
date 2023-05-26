@@ -13,10 +13,9 @@ from .pyp3d_calculation import *
 # 判断点在直线上
 def is_point_on_line(point: GeVec3d, line: Segment, isLine=True) -> bool:
     if isLine:
-        # return True if (norm(cross(point-line.start, point-line.end)) < PL_A) else False
-        return True if (is_parallel(point-line.start, point-line.end)) else False
+        return is_parallel(point-line.start, point-line.end)
     else:
-        return True if is_point_on_segment(point, line) == "POINT_IN" or is_point_on_segment(point, line) == "POINT_END" else False
+        return is_point_on_segment(point, line) == "POINT_IN" or is_point_on_segment(point, line) == "POINT_END"
 
 
 # 判断点与线段的关系
@@ -63,7 +62,7 @@ def get_nearest_point_of_point_line(point: GeVec3d, line: Segment) -> GeVec3d:
     # if norm(line1-line0) < PL_A:  # norm of line is zero.
     #     return line0
     a = line.norm*line.norm  # norm(line0-line1)**2
-    b = dot(-1*line.vector, line.start-point)
+    b = dot(-1.0*line.vector, line.start-point)
     return line.start+(b/a)*line.vector
 
 
@@ -202,7 +201,8 @@ def is_two_segments_intersect_2D(segmA: Segment, segmB: Segment, ignoreZero=True
     straA = dot(cross(p1-p3, p4-p3), cross(p2-p3, p4-p3))
     straB = dot(cross(p4-p1, p2-p1), cross(p3-p1, p2-p1))
     maxl = max(norm(p1), norm(p2), norm(p3), norm(p4))+1
-    return True if (abs(straA) < maxl*PL_A or straA <= 0) and (abs(straB) < maxl*PL_A or straB <= 0) else False
+    # straA<maxl*PL_A
+    return (abs(straA) < maxl*PL_A or straA <= 0) and (abs(straB) < maxl*PL_A or straB <= 0)
     # first veision
     # if norm(cross(p2-p1, p4-p3))<PL_E8 and norm(cross(p3-p1, p3-p2))<PL_E8 : # collinear
     #     return True if (dot(p3-p1, p3-p2)<=0 or dot(p4-p1, p4-p2)<=0) else False
@@ -775,7 +775,9 @@ def is_point_in_contourline(point: GeVec3d, sec: Section) -> bool:
         if is_point_on_contourline(point, sec):
             return True
         points = get_discrete_points_from_section(sec)
-        return True if is_point_in_polygon(point, points) else False
+        return is_point_in_polygon(point, points)
+    else:
+        return False
 
 
 # 多边形是否自相交
@@ -917,16 +919,16 @@ def is_line_close(line: Line) -> bool:
 # 判断Line在XoY二维平面
 def is_line_in_two_dimensional(param) -> bool:
     if isinstance(param, (GeVec2d, GeVec3d)):
-        return True if(is_float_zero(to_vec3(param).z)) else False
+        return is_float_zero(to_vec3(param).z)
     elif isinstance(param, (list, tuple)):  # len(param)==2: #segment
         for iter in param:
             if not is_line_in_two_dimensional(iter):
                 return False
         return True
     elif isinstance(param, Segment):
-        return True if(is_float_zero(abs(to_vec3(param.start).z)+abs(to_vec3(param.end).z))) else False
+        return is_float_zero(abs(to_vec3(param.start).z)+abs(to_vec3(param.end).z))
     elif isinstance(param, Arc):
-        return True if(is_two_dimensional_matrix(param.transformation)) else False
+        return is_two_dimensional_matrix(param.transformation)
     elif isinstance(param, SplineCurve):
         for point in param.points:
             if not is_float_zero((param.transformation*point).z):
@@ -951,7 +953,7 @@ def is_line_in_two_dimensional(param) -> bool:
 # 参数是否全部在同一个平面上（支持多种类型）
 def is_parts_locate_on_plane(param, plane: GeTransform) -> bool:
     if isinstance(param, (GeVec2d, GeVec3d)):
-        return (is_point_on_plane(to_vec3(param), plane))
+        return is_point_on_plane(to_vec3(param), plane)
     elif isinstance(param, (list, tuple)):  # and len(param)==2:
         # return True if(is_point_on_plane(param[0],mat) and is_point_on_plane(param[1],mat)) else False
         for iter in param:
@@ -959,7 +961,7 @@ def is_parts_locate_on_plane(param, plane: GeTransform) -> bool:
                 return False
         return True
     elif isinstance(param, Arc):
-        return (is_two_planes_intersect(param.transformation, plane) == "PLANES_COPLANAR")
+        return is_two_planes_intersect(param.transformation, plane) == "PLANES_COPLANAR"
     elif isinstance(param, SplineCurve):
         for point in param.points:
             if not is_point_on_plane(param.transformation*point, plane):

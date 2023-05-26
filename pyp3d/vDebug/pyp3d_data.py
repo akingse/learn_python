@@ -458,10 +458,10 @@ class GeVec3d(BufferStackBase):
             raise TypeError('improper parameter!')
 
     def __lt__(self, a):
-        return True if sqrt(self.x*self.x+self.y*self.y+self.z*self.z) < sqrt(a.x*a.x+a.y*a.y+a.z*a.z) else False
+        return sqrt(self.x*self.x+self.y*self.y+self.z*self.z) < sqrt(a.x*a.x+a.y*a.y+a.z*a.z)
 
     def __eq__(self, other) -> bool:
-        return True if ((self - other).norm() < PL_E8) else False
+        return (self - other).norm() < PL_E8
 
     def __hash__(self) -> int:
         return super().__hash__()

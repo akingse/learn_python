@@ -19,7 +19,7 @@ def test_ToLeft(p: GeVec2d, q: GeVec2d, s: GeVec2d) -> bool:
         q.x*s.y-q.y*s.x +\
         s.x*p.y-s.y*p.x
     # return Area2
-    return True if (Area2 >= 0) else False  # on the line isnot toleft
+    return Area2 >= 0 # on the line isnot toleft
 # 外网暂不支持矢量operator * ^
 
 
@@ -94,7 +94,7 @@ def test_InTriangle(p: GeVec2d, triangle: list) -> bool:
     b1 = test_ToLeft(p, triangle[0], triangle[1])  # both ccw and cw
     b2 = test_ToLeft(p, triangle[1], triangle[2])
     b3 = test_ToLeft(p, triangle[2], triangle[0])
-    return True if ((b1 and b2 and b3) or not ((b1 and b2 and b3))) else False
+    return (b1 and b2 and b3) or not ((b1 and b2 and b3))
 
 
 def test_LTL(S: list):

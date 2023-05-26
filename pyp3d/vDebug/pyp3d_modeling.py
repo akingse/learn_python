@@ -38,7 +38,7 @@ def sweep_stere(sec: Section, line: Line, isSmooth=False) -> Combine:
     else:  # lenSegm>=3
         # while close or open path.
         secList = create_middle_discrete_sections(
-            secRefer, points, is_coincident(points[0], points[-1]))
+            secRefer, points, is_coincident(points[0], points[len(points)-1]))
         # for i in range(lenSegm):
         #     secI = Section(get_discrete_points_from_section(secList[i], 30))
         #     secII = Section(get_discrete_points_from_section(secList[i+1], 30))
@@ -63,7 +63,7 @@ def sweep_parallel(sec: Section, line: Line) -> Combine:
         A = polyline[i]
         B = polyline[i+1]
         C = polyline[i+2]
-        P = paraList[-1]
+        P = paraList[-1]  # len(points)-1
         # angle = get_angle_of_two_vectors(B-A, C-B)
         mat = get_matrix_from_three_points([A, B, C], False)
         if (inverse_std(mat)*P).y >= 0:  # in angle
@@ -96,8 +96,8 @@ def create_middle_discrete_sections(sec: Section, points: list, isClose=False) -
     segms = get_segments_from_points(points)
     if isClose:
         secIter = sec
-        # if is_coincident(points[0], points[-1]):#first point and last point must coincident
-        pointsTemp = [points[1], points[0], points[-2]]
+        #first point and last point must coincident
+        pointsTemp = [points[1], points[0], points[len(points)-2]]
         secFirst = create_middle_shadow_section(secIter, pointsTemp, True)[0]
         secList = [secFirst]
         for i in range(len(segms)-1):
@@ -114,7 +114,7 @@ def create_middle_discrete_sections(sec: Section, points: list, isClose=False) -
             secMid, secIter = create_middle_shadow_section(
                 secIter, pointsTemp, True)
             secList.append(secMid)
-        secLast = trans(points[-1]-points[-2])*secIter
+        secLast = trans(points[len(points)-1]-points[len(points)-2])*secIter
         secList.append(secLast)
     return secList
 
@@ -183,7 +183,7 @@ def sweep_curve_discrete(sec: Section, line: Line) -> Combine:
             pointsDis += pointsA
         # elif isinstance(iter, SplineCurve):
     disNum += 1  # the last point
-    pointsDis.append(get_part_end_point(fragms[-1]))
+    pointsDis.append(get_part_end_point(fragms[-1])) # the -1 index only in python
     # correct the first section
     if isinstance(fragms[0], (Arc, SplineCurve)):  # need correct
         secFirst = secRefer
@@ -373,7 +373,7 @@ def sweep_twist(sec: Section, height: float, pitch: float, isDiscrete=True, isCc
     else:
         secDis = sec
     secList = []
-    discretNum = floor(height)//2
+    discretNum = floor(height)//2 #integer divede
     sign = 2*float(isCcw)-1
     for i in range(discretNum+1):
         secList.append(trans(0, 0, height*i/discretNum) *
@@ -484,7 +484,7 @@ def loft_different(sec1: Section, sec2: Section) -> Loft:
     numLast = disNum-numSum
     numRec.append(numLast)
     pointsI = get_discrete_points_from_fragment(
-        segmB[-1], numLast, True)  # must be close
+        segmB[len(segmB)-1], numLast, True)  # must be close
     pointsB += pointsI
     # process corresponding section
     numSum = 0
@@ -494,16 +494,16 @@ def loft_different(sec1: Section, sec2: Section) -> Loft:
         numSum += numRec[i]
     if len(segmT) == len(segmB):  # while fragments equal
         pointsI = get_discrete_points_from_fragment(
-            segmT[-1], numRec[len(segmT)-1], True)
+            segmT[len(segmT)-1], numRec[len(segmT)-1], True)
         pointsC += pointsI
     else:
         pointsI = get_discrete_points_from_fragment(
-            segmT[-1], numRec[len(segmT)-1], False)
+            segmT[len(segmT)-1], numRec[len(segmT)-1], False)
         pointsC += pointsI
         numSum += numRec[len(segmT)-1]
         numLast = disNum-numSum
         pointsC += get_much_offset_points_from_two_points(
-            Segment(pointsC[-1], pointsC[0]), numLast, False)
+            Segment(pointsC[len(pointsC)-1], pointsC[0]), numLast, False)
     # the discrete modeling
     sectionList = []
     for i in range(layerNum+1):  # layer

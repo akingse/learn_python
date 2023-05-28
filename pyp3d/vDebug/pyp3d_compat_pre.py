@@ -183,7 +183,9 @@ straight_sweep = sweep_straight
 # pyp3d_component
 combine = Combine
 GeLineString = Line
-PointString = GePoint
+LineString = Line
+PointString = Point
+GePoint=Point
 # pyp3d_matrix
 rotation = rotate
 translate = trans

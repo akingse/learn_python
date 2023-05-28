@@ -295,10 +295,10 @@ def set_matrix_by_column_vectors(vecX, vecY, vecZ, p=GeVec3d(0, 0, 0)) -> GeTran
     return matrix
 
 
-def set_matrix_by_row_vectors(vecA, vecB, vecC) -> GeTransform:  # 通过行矢量创建矩阵
-    matrix = GeTransform([[vecA.x, vecA.y, vecA.z, 0.0],
-                          [vecB.x, vecB.y, vecB.z, 0.0],
-                          [vecC.x, vecC.y, vecC.z, 0.0]])
+def set_matrix_by_row_vectors(vecA, vecB, vecC, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过行矢量创建矩阵
+    matrix = GeTransform([[vecA.x, vecA.y, vecA.z, p.x],
+                          [vecB.x, vecB.y, vecB.z, p.y],
+                          [vecC.x, vecC.y, vecC.z, p.z]])
     return matrix
 
 

@@ -96,7 +96,7 @@ def create_middle_discrete_sections(sec: Section, points: list, isClose=False) -
     segms = get_segments_from_points(points)
     if isClose:
         secIter = sec
-        #first point and last point must coincident
+        # first point and last point must coincident
         pointsTemp = [points[1], points[0], points[len(points)-2]]
         secFirst = create_middle_shadow_section(secIter, pointsTemp, True)[0]
         secList = [secFirst]
@@ -183,7 +183,8 @@ def sweep_curve_discrete(sec: Section, line: Line) -> Combine:
             pointsDis += pointsA
         # elif isinstance(iter, SplineCurve):
     disNum += 1  # the last point
-    pointsDis.append(get_part_end_point(fragms[-1])) # the -1 index only in python
+    # the -1 index only in python
+    pointsDis.append(get_part_end_point(fragms[-1]))
     # correct the first section
     if isinstance(fragms[0], (Arc, SplineCurve)):  # need correct
         secFirst = secRefer
@@ -373,7 +374,7 @@ def sweep_twist(sec: Section, height: float, pitch: float, isDiscrete=True, isCc
     else:
         secDis = sec
     secList = []
-    discretNum = floor(height)//2 #integer divede
+    discretNum = floor(height)//2  # integer divede
     sign = 2*float(isCcw)-1
     for i in range(discretNum+1):
         secList.append(trans(0, 0, height*i/discretNum) *
@@ -512,9 +513,9 @@ def loft_different(sec1: Section, sec2: Section) -> Loft:
             pointJ = pointsB[j]+(i/layerNum)*(pointsC[j]-pointsB[j])
             pointList.append(pointJ)
         pointListU = get_points_on_unified_plane(pointList)
-        if is_polygon_self_intersect(pointListU):
-            raise ValueError('some lines self-intersect in polygon!')
-        sectionList.append(to_section(pointListU))
+        # if is_polygon_self_intersect(pointListU):
+        #     raise ValueError('some lines self-intersect in polygon!')
+        sectionList.append(Section(pointListU))
     geo = Loft(sectionList)
     geo.smooth = True
     return geo
@@ -549,6 +550,66 @@ def arc_correspond_point_sweep(sec1: Section, sec2: Section) -> Loft:
     geo = Loft(to_section(arcSecList), to_section(lineSecList))
     geo.smooth = True
     return geo
+
+
+def _is_all_fragment(val: list) -> bool:
+    for iter in val:
+        if isinstance(iter, Segment) or isinstance(iter, Arc) or isinstance(iter, SplineCurve) or \
+                isinstance(iter, GeVec3d) or isinstance(iter, Line):  # or isinstance(iter, GeVec2d)
+            continue
+        else:
+            return False
+    return True
+
+
+# 自定义fragment列表对应的Loft
+def loft_correspond_fragment(linesBot: list, linesTop: list) -> Loft:
+    if len(linesBot) != len(linesTop) or not all(list(map(_is_all_fragment, linesBot))) or not all(list(map(_is_all_fragment, linesBot))):
+        raise ValueError('loft_correspond_fragment parameter error!')
+    # check coplanar
+    secBot = Section(linesBot)
+    secTop = Section(linesTop)
+    # check close
+    for iA in range(len(linesBot)-2):
+        if not is_coincident(get_part_end_point(linesBot[iA][-1]), get_part_start_point(linesBot[iA+1][0])):
+            raise ValueError('every fragment must be continuous')
+    if not is_coincident(get_part_end_point(linesBot[len(linesBot)-1][-1]), get_part_start_point(linesBot[0][0])):
+        raise ValueError('every fragment must be continuous')
+    for iB in range(len(linesTop)-2):
+        if not is_coincident(get_part_end_point(linesTop[iB][-1]), get_part_start_point(linesTop[iB+1][0])):
+            raise ValueError('every fragment must be continuous')
+    if not is_coincident(get_part_end_point(linesTop[len(linesTop)-1][-1]), get_part_start_point(linesTop[0][0])):
+        raise ValueError('every fragment must be continuous')
+    normB = get_perimeter_of_line(Line(linesBot))
+    normT = get_perimeter_of_line(Line(linesTop))
+    disNumEach = int(max(normB, normT)/len(linesBot) /
+                     10) if int(max(normB, normT)/len(linesBot)/10) >= 20 else 20
+    distLayer = get_distance_of_point_plane(
+        get_first_point_on_section(secTop), secBot.transformation)
+    layerNum = int(distLayer/20) if int(distLayer/20) >= 10 else 10  # layer
+    pointsB = []  # sectionBot
+    for iB in range(len(linesBot)):  # each frag list
+        if len(linesBot[iB]) == 1 and isinstance(linesBot[iB][0], GeVec3d):
+            for i in range(disNumEach):
+                pointsB.append(linesBot[iB][0])
+        else:
+            pointsB += get_discrete_points_from_line(
+                Line(linesBot[iB]), disNumEach, False, False)
+        if (iB != len(linesBot)-1):  # remove last coincide
+            pointsB.pop()
+    pointsT = []
+    for iT in range(len(linesTop)):  # each frag list
+        if len(linesTop[iT]) == 1 and isinstance(linesTop[iT][0], GeVec3d):
+            for i in range(disNumEach):
+                pointsT.append(linesTop[iT][0])
+        else:
+            pointsT += get_discrete_points_from_line(
+                Line(linesTop[iT]), disNumEach, False, False)
+        if (iT != len(linesTop)-1):  # remove last coincide
+            pointsT.pop()
+    loft = Loft(Section(pointsB), Section(pointsT))
+    loft.smooth = True
+    return loft
 
 
 # ------------------------------------------------------------------------------------------

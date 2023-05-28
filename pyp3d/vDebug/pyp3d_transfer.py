@@ -111,7 +111,10 @@ def get_part_start_point(part) -> GeVec3d:
         child = get_nested_parts_from_line(part)
         return get_part_start_point(child[0])
     elif isinstance(part, list) and len(part) > 0:
-        return part[0]
+        if is_all_vec(part[0]):
+            return part[0]
+        else:
+            return get_part_start_point(part[0])
     else:
         raise ValueError('parameter type error!')
 
@@ -130,7 +133,10 @@ def get_part_end_point(part) -> GeVec3d:
         child = get_nested_parts_from_line(part)
         return get_part_end_point(child[-1])
     elif isinstance(part, list) and len(part) > 0:
-        return part[-1]
+        if is_all_vec(part[-1]):
+            return part[-1]
+        else:
+            return get_part_start_point(part[-1])
     else:
         raise ValueError('parameter type error!')
 # get_start_point_of_line = get_part_start_point

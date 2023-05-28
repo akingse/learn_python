@@ -6,7 +6,7 @@
 
 from copy import deepcopy
 from .pyp3d_api import *
-import winsound
+# import winsound
 
 # ------------------------------------------------------------------------------------------
 # |                                          ARC                                           |
@@ -98,9 +98,8 @@ def arc_of_radius_points_2D(pStart: GeVec2d, pEnd: GeVec2d, R: float) -> Arc:
 
 arc_of_radius_points = arc_of_radius_points_2D
 
+
 # 三点组成线段，倒角圆弧
-
-
 def arc_of_segments_bevel(points: list,  R: float) -> Arc:
     # arc_of_segments_chamfer
     if len(points) != 3:
@@ -646,8 +645,8 @@ def print_vector(*args) -> None:
 
 def print_result(res: bool) -> None:
     print("test pass") if (res) else print("test error!!!!!!!!!!!!!!!!!!!!")
-    if not res:
-        winsound.Beep(800, 1000)
+    # if not res:
+    #     winsound.Beep(800, 1000)
 
 
 # to wangqingwei

@@ -32,7 +32,8 @@ def is_all_vec(points) -> bool:
         if isinstance(iter, (GeVec2d, GeVec3d)):
             continue
         elif isinstance(iter, list):
-            is_all_vec(iter)
+            if not is_all_vec(iter):
+                return False
         else:
             return False
     return True

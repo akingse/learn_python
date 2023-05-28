@@ -269,7 +269,7 @@ def get_intersect_point_of_two_lines(lineA: Segment, lineB: Segment, isLineA=Fal
     for iter in pointInter:
         if isLineA and isLineB:  # line and line
             pointsIn.append(iter)
-        if isLineA and (not isLineB):  # line and segment
+        elif isLineA and (not isLineB):  # line and segment
             if (is_point_on_segment(iter, lineB) == "POINT_IN" or is_point_on_segment(iter, lineB) == "POINT_END"):
                 pointsIn.append(iter)
         elif (not isLineA) and isLineB:  # segment and line

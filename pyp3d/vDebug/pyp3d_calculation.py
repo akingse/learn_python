@@ -270,7 +270,7 @@ def get_discrete_points_from_line(line: Line, disNumO: int = 0, onlyCurve=True, 
             disPoints += pointsSeg
     elif isinstance(fragmList[-1], SplineCurve):
         pointsSpline = get_discrete_points_from_spline(
-            fragmList[i-1], numLast, False)
+            fragmList[-1], numLast, False)
         disPoints += pointsSpline
     else:
         raise TypeError("get_discrete_points_from_line type error!")

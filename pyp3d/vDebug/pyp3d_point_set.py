@@ -307,8 +307,6 @@ def is_point_in_triangle(point: GeVec3d, trigon: list) -> bool:  # 点是否在�
         cross(pB-pA, point-pA), cross(pC-pA, point-pA))
     betB = is_two_vectors_same_direction(
         cross(pA-pB, point-pB), cross(pC-pB, point-pB))
-    # return ((betA == "DIRECTION_OPPO" or betA == "DIRECTION_ANY") and
-    #                 (betB == "DIRECTION_OPPO" or betB == "DIRECTION_ANY"))
     # points locate on same side.
     sdA = cross(point-pA, pB-pA)
     sdB = cross(point-pB, pC-pB)

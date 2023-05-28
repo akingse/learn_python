@@ -282,8 +282,14 @@ class NonComponent(Noumenon):
 class Component(Graphics):
     def __init__(self):
         Graphics.__init__(self)
+        self.__allDomain = ('Common', 'Archi', 'Struct', 'HVAC', 'Water', 'Elec', 'AssemblyDesign', 'PKPMAC', 'Formwork', 'GreenBuilding',
+                            'Construct', 'MEPCommon', 'Other', 'AssemblySteel', 'DetailedModel', 'AssemblyModeling', 'SPBBIMStruct', 'SPBStructModel',
+                            'BIMBASE', 'Substation', 'AMCommon', 'GeneralLayout', 'Underground', 'ConstructionDesign', 'PSBase', 'ComponentEditEnv', 'ElectricalDesign',
+                            'GongYi', 'Photovoltaic')
         self[PARACMPT_KEYWORD_SOURCE] = ''
         self.schemaName, self.className, self.representation = 'PBM_CoreModel', 'BPGraphicElementParametricComponent', 'Component'
+        self.Domain = 'Common'
+        self.Category = 'proxy'
 
     def replace(self):
         if not PARACMPT_KEYWORD_REPLACE in self:
@@ -304,6 +310,28 @@ class Component(Graphics):
     @schemaName.setter
     def schemaName(self, val):
         self[PARACMPT_KEYWORD_SCHEMA_NAME] = val
+
+    @property
+    def Category(self):
+        return self[PARACMPT_KEYWORD_CATEGORY]
+
+    @Category.setter
+    def Category(self, val):
+        if not isinstance(val, str):
+            raise TypeError('improper type!')
+        self[PARACMPT_KEYWORD_CATEGORY] = val
+
+    @property
+    def Domain(self):
+        return self[PARACMPT_KEYWORD_DOMAIN]
+
+    @Domain.setter
+    def Domain(self, val):
+        if not isinstance(val, str):
+            raise TypeError('improper type!')
+        if val not in self.__allDomain:
+            raise TypeError('has no this Domain')
+        self[PARACMPT_KEYWORD_DOMAIN] = val
 
     @property
     def className(self):
@@ -420,7 +448,7 @@ class Primitives(Graphics):
 # ------------------------------------------------------------------------------------------
 
 
-class GePoint(Primitives):
+class Point(Primitives):
     def __init__(self, *args):
         Primitives.__init__(self)
         self.representation = 'Point'
@@ -643,12 +671,38 @@ class Section(Primitives):
         else:
             raise TypeError('Line parameter error!')
 
+    def _is_all_point(self, param) -> bool:
+        for iter in param:
+            if isinstance(iter, (GeVec2d, GeVec3d, Segment)):
+                continue
+            elif isinstance(iter, list):
+                if not is_all_vec(iter):
+                    return False
+            else:
+                return False
+        return True
+
+    def _get_all_points(self, param) -> list:
+        res = []
+        for iter in param:
+            if isinstance(iter, GeVec2d):
+                res.append(to_vec3(iter))
+            elif isinstance(iter, GeVec3d):
+                res.append(iter)
+            elif isinstance(iter, Segment):
+                res.append(iter.m_start)
+                res.append(iter.m_end)
+            elif isinstance(iter, list):
+                res += self._get_all_points(iter)
+        return res
+
     def _get_first_matrix_from_line(self, param: list) -> GeTransform:
-        pointParts = self._get_points_parts_from_segment(param)
-        if is_all_vec(pointParts):
+        # pointParts = self._get_points_parts_from_segment(param)
+        if self._is_all_point(param):
+            pointParts = self._get_all_points(param)
             return get_matrix_from_points(pointParts)
         for iter in param:
-            if isinstance(iter, (GeVec2d, GeVec3d)):
+            if isinstance(iter, (GeVec2d, GeVec3d, Segment)):
                 continue
             elif isinstance(iter, Arc):
                 return get_orthogonal_matrix(iter.transformation, True)
@@ -1216,7 +1270,7 @@ class Polyface(Primitives):  # 三角面片
                 strs = line.split(" ")
                 if strs[0] == "v":
                     vertexListO.append(
-                        10000*GeVec3d(float(strs[1]), float(strs[2]), float(strs[3])))
+                        GeVec3d(10000*float(strs[1]), 10000*float(strs[2]), 10000*float(strs[3])))
                 if strs[0] == "f":
                     for i in range(1, len(strs)):
                         faces = strs[i].split("/")
@@ -1283,6 +1337,48 @@ class CrossBody(Primitives):  # 交叉布尔交体
             raise TypeError('improper type!')
         self[PARACMPT_CROSS_BODY_SMOOTH] = val
 
+
+class Swept(Primitives):  # 单截面沿曲线路径扫掠造型
+    def __init__(self, seciton=Section(), line=Line()):
+        Primitives.__init__(self)
+        self.representation = 'Swept'
+        self.extractGraphics = UnifiedFunction(
+            PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_SWEPT_TO_GRAPHICS)
+        if not isinstance(seciton, (Section, Fusion, Intersect)):
+            raise TypeError('Swept parameter TypeError!')
+        self.profile = seciton
+        if not isinstance(line, Line):
+            raise TypeError('Swept parameter TypeError!')
+        self.path = line
+        self.capped = True
+
+    @ property
+    def profile(self):
+        return self[PARACMPT_SWEPT_PROFILE]
+
+    @ profile.setter
+    def profile(self, val):
+        if not isinstance(val, (Section, Fusion, Intersect)):
+            raise TypeError('Swept parameter TypeError!')
+        self[PARACMPT_SWEPT_PROFILE] = val
+
+    @ property
+    def path(self):
+        return self[PARACMPT_SWEPT_PATH]
+
+    @ path.setter
+    def path(self, val):
+        if not isinstance(val, Line):
+            raise TypeError('Swept parameter TypeError!')
+        self[PARACMPT_SWEPT_PATH] = val
+
+    @ property
+    def capped(self):
+        return self[PARACMPT_SWEPT_CAPPED]
+
+    @ capped.setter
+    def capped(self, val):
+        self[PARACMPT_SWEPT_CAPPED] = val
 
 # ------------------------------------------------------------------------------------------
 # |                                          INNER                                         |
@@ -1443,42 +1539,3 @@ def to_segment(points: list) -> Segment:
     if len(points) != 2:
         raise ValueError('parameter number error!')
     return Segment(points[0], points[1])
-
-
-'''
-class Plane():  # 几何概念-平面
-    # 几种默认构造
-    # 1 三点式（两个向量）
-    # 2 一般式 # Ax+By+Cz+D=0
-    # 3 平面法向量（点法式）
-    # 4 矩阵形式（默认XoY面）
-    def __init__(self, *args):
-        if len(args) == 1 and isinstance(args[0], GeTransform):
-            self.m_mat = args[0]
-        elif len(args) == 3 and is_all_vec(args):
-            self.m_mat = get_matrix_from_three_points(args)
-        elif len(args) == 4 and is_all_num(args):
-            # Ax+By+Cz+D=0
-            A = args[0]
-            B = args[1]
-            C = args[2]
-            D = args[3]
-            if is_zero(A) and is_zero(B) and is_zero(C):
-                raise ValueError('parameter error!')
-            if not is_zero(C):
-                p1 = GeVec3d(0, 0, -D/C)
-            else:
-                if not is_zero(B):
-                    p2 = GeVec3d(0, -D/B, 0)
-                    if not is_zero(A):
-                        p3 = GeVec3d(-D/A, 0, 0)
-                    else:
-                        ...
-                else:
-                    ...
-
-            self.m_mat = get_matrix_from_three_points([p1, p2, p3])
-
-
-
-'''

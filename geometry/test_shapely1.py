@@ -11,9 +11,9 @@ from shapely import *
 import numpy as np
 import sys
 import os
-mypath = 'D:\Alluser\learn_python'  # include pyp3d
-sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
-from pyp3d import *  # NOQA: E402
+# mypath = 'D:\Alluser\learn_python'  # include pyp3d
+# sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
+# from pyp3d import *  # NOQA: E402
 
 
 

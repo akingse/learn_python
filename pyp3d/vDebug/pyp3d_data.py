@@ -489,6 +489,8 @@ class GeVec3d(BufferStackBase):
 
     def norm(self):
         return sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
+    def norm2(self):
+        return self.x*self.x+self.y*self.y+self.z*self.z
 
     def unitize(self):
         n = self.norm()
@@ -504,6 +506,10 @@ class GeVec3d(BufferStackBase):
         if (isinf(self.x) or isinf(self.y) or isinf(self.z)):
             return False
         return True
+    def cross(self,val): #->GeVec3d
+        return GeVec3d(self.y*val.z-self.z*val.y, self.z*val.x-self.x*val.z, self.x*val.y-self.y*val.x)
+    def dot(self,val)->float:
+        return self.x*val.x + self.y*val.y + self.z*val.z
 
 class GeVec2d(BufferStackBase):
     def __init__(self, *args):  # self.x, self.y = x, y

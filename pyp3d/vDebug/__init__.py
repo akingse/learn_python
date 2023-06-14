@@ -20,3 +20,4 @@ from .pyp3d_function import *  # 功能函数接口
 from .pyp3d_modeling import *  # 造型算法
 from .pyp3d_support import *  # 开发支持
 from .pyp3d_data_driven import *  # 参数驱动
+from .function_temp import *  # 临时函数

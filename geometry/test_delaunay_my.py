@@ -29,21 +29,6 @@ p1 = Point(1, 2, 3)
 # print(d)
 
 
-def _get_rand_point(is2D=True) -> GeVec3d:
-    rg = 100
-    if is2D:
-        return GeVec3d(randint(-rg, rg), randint(-rg, rg))
-    else:
-        return GeVec3d(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
-
-
-def _gen_rand_point(is2D=True) -> Point:
-    rg = 100
-    if is2D:
-        return Point(randint(-rg, rg), randint(-rg, rg), 0)
-    else:
-        return Point(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
-
 
 def _show_close_line(points: list):
     if len(points) == 0:
@@ -164,8 +149,8 @@ def _is_point_in_circumcircle(pO, trigon: list) -> bool:
     return np.linalg.det(M) <= 0
 
 
-RP = _get_rand_point
-# GP = _gen_rand_point
+RP = get_rand_point
+# GP = gen_rand_point
 
 if __name__ == '__main__':
     for i in range(int(1e2)):

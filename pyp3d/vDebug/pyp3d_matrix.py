@@ -288,14 +288,14 @@ def inverse(M: GeTransform) -> GeTransform:  # 计算矩阵的逆矩阵
 # ------------------------------------------------------------------------------------------
 
 
-def set_matrix_by_column_vectors(vecX, vecY, vecZ, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过列矢量创建矩阵
+def set_matrix_by_column_vectors(vecX:GeVec3d, vecY:GeVec3d, vecZ:GeVec3d, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过列矢量创建矩阵
     matrix = GeTransform([[vecX.x, vecY.x, vecZ.x, p.x],
                           [vecX.y, vecY.y, vecZ.y, p.y],
                           [vecX.z, vecY.z, vecZ.z, p.z]])
     return matrix
 
 
-def set_matrix_by_row_vectors(vecA, vecB, vecC, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过行矢量创建矩阵
+def set_matrix_by_row_vectors(vecA:GeVec3d, vecB:GeVec3d, vecC:GeVec3d, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过行矢量创建矩阵
     matrix = GeTransform([[vecA.x, vecA.y, vecA.z, p.x],
                           [vecB.x, vecB.y, vecB.z, p.y],
                           [vecC.x, vecC.y, vecC.z, p.z]])

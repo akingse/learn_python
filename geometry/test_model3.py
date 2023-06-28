@@ -52,54 +52,129 @@ geo = loft_different(sec1, sec2)
 # create_geometry(sec2)
 # create_geometry(geo)
 
+# 三角形和包围盒相交
 
-def _isTriangleBoundingBoxIntersect(trigon: list, box: list) -> bool:
-    min = box[0]
-    max = box[1]
-    create_geometry(trans(min)*scale(max-min)*Cube())
-    # is point in box
-    pA_in = 0
-    if (pA_in):
-        return true
-
-    return false
-
-
-mat = roty()
+mat = roty() #pi/4
 # trigon=mat*[Vec3(10, 20),Vec3(80, 100),Vec3(200, 0)]
 # trigon=roty(pi/2)*[Vec3(0, 0),Vec3(70, 0),Vec3(50, 100)]
 # trigon = [get_rand_point(), get_rand_point(), get_rand_point()]
 # trigon = [Vec3(-87, 21), Vec3(-27, -20), Vec3(-90, 95)]
 # trigon = [Vec3(-10, 0), Vec3(70, 0), Vec3(50, 50)]
 # trigon = [Vec3(20, 40), Vec3(200, 0), Vec3(80, 100)] #isPointInTriangle
-trigon = [Vec3(20, 40), Vec3(80, 100), Vec3(200, 0)] #isPointInTriangle
+# trigon = [Vec3(20, 40), Vec3(80, 100), Vec3(200, 0), ] #isPointInTriangle
+# trigon = [Vec3(200, 0), Vec3(80, 100),Vec3(20, 40), ] #isPointInTriangle
+p1 = Vec3(20, 40)
+p2 = Vec3(200, 0)
+p3 = Vec3(80, 100)
+trigon = mat*[p2, p1, p3, ]
 
-create_geometry(Section(trigon))
+
+# create_geometry(Section(trigon))
 # 测试包围圆
-p, r = getTriangleBoundingCircle(trigon)
+# p, r = getTriangleBoundingCircle(trigon)
 # create_geometry(trans(p)*scale(r)*Arc())
 # create_geometry(trans(p)*scale(r)*Sphere())
 
 # 测试点在三角形内
-isPointInTriangle=isPointInTriangle2D
-print(isPointInTriangle(mat*Vec3(0,0),trigon)) #out
-print(isPointInTriangle(mat*Vec3(50,50),trigon)) #in
-print(isPointInTriangle(mat*Vec3(30, 50),trigon)) #on
-print(isPointInTriangle(mat*Vec3(20, 40),trigon)) #on
-print(isPointInTriangle(mat*Vec3(200, 0),trigon)) #on
-print(isPointInTriangle(mat*Vec3(80, 100),trigon)) #on
-print(isPointInTriangle(mat*Vec3(200,100),trigon)) #out
-print(isPointInTriangle(mat*Vec3(100,-20),trigon)) #out
+# isPointInTriangle=isPointInTriangle2D
+print(isPointInTriangle(mat*Vec3(0, 0), trigon))  # out
+print(isPointInTriangle(mat*Vec3(30, 80), trigon))  # out
+print(isPointInTriangle(mat*Vec3(80, 120), trigon))  # out
+print(isPointInTriangle(mat*Vec3(50, 50), trigon))  # in
+print(isPointInTriangle(mat*Vec3(30, 50), trigon))  # on
+print(isPointInTriangle(mat*Vec3(20, 40), trigon))  # on
+print(isPointInTriangle(mat*Vec3(200, 0), trigon))  # on
+print(isPointInTriangle(mat*Vec3(80, 100), trigon))  # on
+print(isPointInTriangle(mat*Vec3(200, 100), trigon))  # out
+print(isPointInTriangle(mat*Vec3(100, -20), trigon))  # out
+
+# exit(0)
+_test_fun = is_segment_cross_triangle_surface
+pS = Vec3(0, 0, 100)
+# print(_test_fun([pS,Vec3(0,0,0)],trigon)) #out
+# print(_test_fun([pS,Vec3(30,80)],trigon)) #out
+# print(_test_fun([pS,Vec3(80,120)],trigon)) #out
+# print(_test_fun([pS,Vec3(50,50)],trigon)) #out
+# print(_test_fun([pS,Vec3(30, 50)],trigon)) #on
+# print(_test_fun([pS,Vec3(20, 40)],trigon)) #on
+# print(_test_fun([pS,Vec3(200, 0)],trigon)) #on
+# print(_test_fun([pS,Vec3(80, 100)],trigon)) #on
+# print(_test_fun([pS,Vec3(200,100)],trigon)) #out
+# print(_test_fun([pS,Vec3(100,-20)],trigon)) #out
+
+# 测试 isTwoTrianglesIntersection1
+triL=[Vec3(0,0),Vec3(100,0),Vec3(0,100)]
+triR=[Vec3(0,0),Vec3(100,0),Vec3(100,100)]
+_test_fun=TrianglesIntersection_part1_
+# print(_test_fun(triL,trans(200,0,1)*triL))
+# print(_test_fun(triL,trans(200,0,1)*triL,rotx(pi/2)))
+# print(_test_fun(triL,trans(200,0,1)*triL,rotz(pi/2)))
+# print(_test_fun(triL,trans(100,0,1)*triL))
+# print(_test_fun(triL,trans(100,0,1)*triL,rotx(pi/2)))
+# print(_test_fun(triL,trans(100,0,1)*triL,rotz(pi/2)))
+# print(_test_fun(trans(-1,0)*triL,roty(-pi/2)*triL))
+# print(_test_fun(trans(-1,0)*triL,transz(10)*roty(-pi/2)*triL))
+# print(_test_fun(trans(-1,0)*triL,transz(-10)*roty(-pi/2)*triL))
+
+print('intersect')
+print(_test_fun(triL,trans()*roty(-pi/2)*triR)) #点在面内
+print(_test_fun(triL,trans(1,0)*roty(-pi/2)*triR)) 
+print(_test_fun(triL,trans(1,1)*roty(-pi/2)*triR)) 
+print(_test_fun(triL,roty(-pi/2)*triL))
+print(_test_fun(triL,roty(-pi/6)*triL))
+print(_test_fun(triL,trans(100,0)*roty(-pi/6)*triL))
+# create_geometry(Section(trans(0,0)*triL).colorBlue())
+# create_geometry(Section(roty(-pi/2)*triL).colorBlue())
+
+# 测试三角形与包围盒相交
+# res=isTriangleBoundingBoxIntersect(trigon, [Vec3(100,100,100),Vec3(700,600,500)])
+
+triA_0=Vec3(4924425.884660,-385631.016734,5390.000000)
+triA_1=Vec3(4924433.371383,-385624.275658,5390.000000)
+triA_2=Vec3(4924471.172876,-385626.256750,5390.000000)
+triB_0=Vec3(4924425.908760,-385651.280850,5390.000000)
+triB_1=Vec3(4924436.214129,-385631.055425,5390.000000)
+triB_2=Vec3(4924443.183335,-385627.504437,5390.000000)
+
+triA_0=Vec3(4924494.812277,-385870.182834,5750.000000)
+triA_1=Vec3(4924599.812277,-385945.182834,5750.000000)
+triA_2=Vec3(4924586.871325,-385946.886543,5750.000000)
+triB_0=Vec3(4924601.810260,-385940.893598,5750.000000)
+triB_1=Vec3(4924595.257704,-385951.321931,5750.000000)
+triB_2=Vec3(4924589.810992,-385975.185537,5750.000000)
 
 
-# Nodes number in one element cube
-#    5 ____________ 8
-#    /            /|       z
-#   /___________ / |       |
-# 6|            |7 |       |____ y
-#  |            |  |      /
-#  |  1         |  |4    /
-#  |            | /    x
-#  |____________|/
-# 2           3
+triA_0=Vec3(100, 0, 0)
+triA_1=Vec3(0, 173.205, 0)
+triA_2=Vec3(-100, 0, 0)
+triB_0=Vec3(73.2051, 0, -1.22465e-14)
+triB_1=Vec3(173.205, 173.205, 0)
+triB_2=Vec3(273.205, 0, 1.22465e-14)
 
+create_geometry(Section(triA_0,triA_1,triA_2).colorRed())
+create_geometry(Section(triB_0,triB_1,triB_2).colorGreen())
+# p=Vec3(200.00000000000000, -173.20508075688772, 0.0000000000000000)
+# create_geometry(trans(p)*Sphere())
+
+# clear_entity()
+# create_geometry(Section(triA0,triA1,triA2))
+# create_geometry(Section(triB0,triB1,triB2))
+
+# res=is_two_triangles_bounding_box_intersect([triA_0,triA_1,triA_2],[triB_0,triB_1,triB_2],0.001)
+# print(res)
+# d=4.6566128730773926e-10
+# count_pre_clash=count_clash_hard+count_clash_soft
+
+# 改bug
+# total="4074" riangularIntersectC="114014424" 
+
+
+# data load finish, cost time = 3.178s
+time = 18.529
+time = 18.457
+time = 19.088
+TriangularIntersectC=44420000
+count_edgeCrossTri=0
+count_pointInTri=127080000 #由于return true会提前中止函数，所有这个数字比count_across小
+count_segCrossTri=0
+count_across=177680000

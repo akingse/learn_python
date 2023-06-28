@@ -73,10 +73,25 @@ segment = [GeVec3d(-5.0000000000000000, -5.0000000000000000, -10.000000000000000
 
 # 简化测试 ---------------------
 # 使用_getTriangleBoundingCircle //jingujun,转自naviswork
-
 # + 1) 3612 total
 # + 1e-1) 3605
 # + 1e-2) 3555
 # + 1e-3) 3554
 # + 1e-6) 3554
 # + 0) 3554
+
+# 金鼓郡，lite430-p3d
+count_boxA = 1852700
+count_boxB = 1023029
+TIT = (count_boxA+count_boxB)*12  # 34508748, 实际29269473，pointInBox
+
+# 无优化0/1 4074/5160
+# <linkage count_caltime0="0.005000s" count_caltime1="1.177000s" count_caltime2="3.275000s"/>
+# <linkage count_caltime0="0.004000s" count_caltime1="1.158000s" count_caltime2="6.311000s"/>
+# 优化hard 0/1 4010/5096
+# <linkage count_caltime0="0.006000s" count_caltime1="1.219000s" count_caltime2="1.367000s"/>
+# <linkage count_caltime0="0.004000s" count_caltime1="1.150000s" count_caltime2="5.288000s"/>
+# 软碰撞优化
+# <linkage count_clash_hard="4010" count_clash_soft="1421"/>
+#
+

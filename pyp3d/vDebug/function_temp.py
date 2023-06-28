@@ -4,6 +4,20 @@ false = False
 true = True
 eps = 1e-6
 _eps = -1e-6
+# Nodes number in one element cube
+#    7 ____________ 6
+#    /            /|    ^ z
+#   /___________ / |    |     ^  y
+# 4|          5 |  |    |    /
+#  |            |  |    |   /
+#  |  3         |  |2   |  /
+#  |            | /     | /
+#  |____________|/       ----------> x
+# 0           1
+
+
+def create_bounding_box(min: GeVec3d, max: GeVec3d):
+    create_geometry(trans(min)*scale(max-min)*Cube())
 
 
 def _is_all_fragment(val: list) -> bool:
@@ -47,7 +61,8 @@ def isPointInTriangle2D(point, trigon) -> bool:  # 2D
     p0 = trigon[0]
     p1 = trigon[1]
     p2 = trigon[2]
-    ccw = (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y) > 0 #ccw Triangle
+    ccw = (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * \
+        (p1.y - p0.y) > 0  # ccw Triangle
     if ccw:
         if ((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < _eps):
             return false
@@ -68,15 +83,29 @@ def isPointInTriangle2D(point, trigon) -> bool:  # 2D
 
 def isPointInTriangle(point: GeVec3d, trigon: list) -> bool:  # must coplanar
     # using isLeft test
-    create_geometry(Sphere(point))
-    normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
-    if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(normal) < _eps):  # bool isLeftA
+    # create_geometry(Sphere(point))
+    vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
+    if (((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(vecZ) < _eps):  # bool isNotLeftA
         return false
-    if (((trigon[2] - trigon[0]).cross(point - trigon[0])).dot(normal) > eps):  # bool isLeftB
+    if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(vecZ) < _eps):  # bool isNotLeftB
         return false
-    if (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(normal) < _eps):  # bool isLeftC
+    if (((trigon[0] - trigon[2]).cross(point - trigon[2])).dot(vecZ) < _eps):  # bool isNotLeftC
         return false
     return true
+    return not((((trigon[1] - trigon[0]).cross(point - trigon[0])).dot(vecZ) < _eps) or
+               (((trigon[2] - trigon[0]).cross(point - trigon[0])).dot(vecZ) > eps) or
+               (((trigon[2] - trigon[1]).cross(point - trigon[1])).dot(vecZ) < _eps))
+
+
+def pointInTriangle(p,  trigon):
+    # v0 = trigon[0]
+    # v1 = trigon[1]
+    # v2 = trigon[2]
+    u = trigon[1] - trigon[0]
+    v = trigon[2] - trigon[0]
+    w = p - trigon[0]
+    denom = u.dot(v)
+    return u.dot(w) * denom >= 0 and v.dot(w) * denom >= 0 and (u.dot(w) + v.dot(w)) <= denom
 
 
 # 三角形最小包围圆 the Minimum Triangle Bounding Circle
@@ -106,3 +135,191 @@ def getTriangleBoundingCircle(trigon: list):
         return (0.5*(trigon[0]+trigon[2]), 0.5*sqrt(b))
     else:
         return (0.5*(trigon[1]+trigon[2]), 0.5*sqrt(c))
+
+
+def is_segment_cross_triangle_surface(segment, trigon):
+    show_points_line(segment)
+    vec = segment[1] - segment[0]
+    dotA = (trigon[0] - segment[0]).cross(trigon[1] - segment[0]).dot(vec)
+    dotB = (trigon[1] - segment[0]).cross(trigon[2] - segment[0]).dot(vec)
+    dotC = (trigon[2] - segment[0]).cross(trigon[0] - segment[0]).dot(vec)
+    return (dotA < eps and dotB < eps and dotC < eps) or (dotA > _eps and dotB > _eps and dotC > _eps)
+
+    # is_left = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).dot(segment[0] - trigon[0]) > eps
+    # vec_seg = segment[1] - segment[0]
+    # if is_left:
+    #     if vec_seg.dot((trigon[1] - segment[0]).cross(trigon[0] - segment[0])) < -eps:
+    #         return False
+    #     if vec_seg.dot((trigon[2] - segment[0]).cross(trigon[1] - segment[0])) < -eps:
+    #         return False
+    #     if vec_seg.dot((trigon[0] - segment[0]).cross(trigon[2] - segment[0])) < -eps:
+    #         return False
+    #     return True
+    # else:
+    #     if vec_seg.dot((trigon[1] - segment[0]).cross(trigon[0] - segment[0])) > eps:
+    #         return False
+    #     if vec_seg.dot((trigon[2] - segment[0]).cross(trigon[1] - segment[0])) > eps:
+    #         return False
+    #     if vec_seg.dot((trigon[0] - segment[0]).cross(trigon[2] - segment[0])) > eps:
+    #         return False
+    #     return True
+
+
+def isTwoTrianglesIntersection(triA, triB) -> bool:
+    edgesA = [triA[1] - triA[0], triA[2] - triA[1], triA[0] - triA[2]]
+    edgesB = [triB[1] - triB[0], triB[2] - triB[1], triB[0] - triB[2]]
+    axes = [edgesA[0].cross(edgesB[0]),
+            edgesA[0].cross(edgesB[1]),
+            edgesA[0].cross(edgesB[2]),
+            edgesA[1].cross(edgesB[0]),
+            edgesA[1].cross(edgesB[1]),
+            edgesA[1].cross(edgesB[2]),
+            edgesA[2].cross(edgesB[0]),
+            edgesA[2].cross(edgesB[1]),
+            edgesA[2].cross(edgesB[2]),
+            edgesA[0],
+            edgesA[1],
+            edgesA[2],
+            edgesB[0],
+            edgesB[1],
+            edgesB[2]]
+    for axis in axes:
+        create_geometry(Line(Vec3(),axis).colorRand())
+    for axis in axes:
+        dotA0 = axis.dot(triA[0])
+        dotA1 = axis.dot(triA[1])
+        dotA2 = axis.dot(triA[2])
+        dotB0 = axis.dot(triB[0])
+        dotB1 = axis.dot(triB[1])
+        dotB2 = axis.dot(triB[2])
+        minA = min(min(dotA0, dotA1), dotA2)
+        maxA = max(max(dotA0, dotA1), dotA2)
+        minB = min(min(dotB0, dotB1), dotB2)
+        maxB = max(max(dotB0, dotB1), dotB2)
+        if maxA - minB < eps or maxB - minA < eps:
+            return False
+    return True
+
+
+def isTriangleBoundingBoxIntersect(trigon: list, box: list) -> bool:
+    min = box[0]
+    max = box[1]
+    # is point in box
+    p0 = trigon[0]
+    p1 = trigon[1]
+    p2 = trigon[2]
+    if (min.x <= p0.x and min.y <= p0.y and min.z <= p0.z and
+            max.x >= p0.x and max.y >= p0.y and max.z >= p0.z):
+        return true  # contains vertex
+    if (min.x <= p1.x and min.y <= p1.y and min.z <= p1.z and
+            max.x >= p1.x and max.y >= p1.y and max.z >= p1.z):
+        return true  # contains vertex
+    if (min.x <= p2.x and min.y <= p2.y and min.z <= p2.z and
+            max.x >= p2.x and max.y >= p2.y and max.z >= p2.z):
+        return true  # contains vertex
+    pO0 = p0-min
+    pO1 = p1-min
+    pO2 = p2-min
+    vertex = max-min
+    # genarate 12 triangles
+    triTwelve = [[Vec3(0, 0, 0), Vec3(vertex.x, 0, 0), Vec3(vertex.x, vertex.y, 0)],
+                 [Vec3(0, 0, 0), Vec3(0, vertex.y, 0),
+                  Vec3(vertex.x, vertex.y, 0)],
+                 [Vec3(0, 0, vertex.z), Vec3(vertex.x, 0, vertex.z), vertex],
+                 [Vec3(0, 0, vertex.z), Vec3(0, vertex.y, vertex.z), vertex],
+                 [Vec3(0, 0, 0), Vec3(vertex.x, 0, 0),
+                  Vec3(vertex.x, 0, vertex.z)],
+                 [Vec3(0, 0, 0), Vec3(0, 0, vertex.z),
+                  Vec3(vertex.x, 0, vertex.z)],
+                 [Vec3(0, vertex.y, 0), Vec3(vertex.x, vertex.y, 0), vertex],
+                 [Vec3(0, vertex.y, 0), Vec3(0, vertex.y, vertex.z), vertex],
+                 [Vec3(0, 0, 0), Vec3(0, vertex.y, 0),
+                  Vec3(0, vertex.y, vertex.z)],
+                 [Vec3(0, 0, 0), Vec3(0, 0, vertex.z),
+                  Vec3(0, vertex.y, vertex.z)],
+                 [Vec3(vertex.x, 0, 0), Vec3(vertex.x, vertex.y, 0), vertex],
+                 [Vec3(vertex.x, 0, 0), Vec3(vertex.x, 0, vertex.z), vertex]]
+    for iter in triTwelve:
+        if isTwoTrianglesIntersection([pO0, pO1, pO2], iter):
+            return true
+    return false
+
+
+def is_two_triangles_bounding_box_intersect(triA, triB, tolerance):
+    xminA = min(triA[0].x, triA[1].x, triA[2].x) - tolerance
+    xmaxA = max(triA[0].x, triA[1].x, triA[2].x) + tolerance
+    yminA = min(triA[0].y, triA[1].y, triA[2].y) - tolerance
+    ymaxA = max(triA[0].y, triA[1].y, triA[2].y) + tolerance
+    zminA = min(triA[0].z, triA[1].z, triA[2].z) - tolerance
+    zmaxA = max(triA[0].z, triA[1].z, triA[2].z) + tolerance
+    xminB = min(triB[0].x, triB[1].x, triB[2].x)
+    xmaxB = max(triB[0].x, triB[1].x, triB[2].x)
+    yminB = min(triB[0].y, triB[1].y, triB[2].y)
+    ymaxB = max(triB[0].y, triB[1].y, triB[2].y)
+    zminB = min(triB[0].z, triB[1].z, triB[2].z)
+    zmaxB = max(triB[0].z, triB[1].z, triB[2].z)
+    # create boundingbox
+    create_bounding_box(Vec3(xminA, yminA, zminA), Vec3(xmaxA, ymaxA, zmaxA))
+    create_bounding_box(Vec3(xminB, yminB, zminB), Vec3(xmaxB, ymaxB, zmaxB))
+    return not (xminA > xmaxB or yminA > ymaxB or zminA > zmaxB
+                or xminB > xmaxA or yminB > ymaxA or zminB > zmaxA)
+    # return xminA <= xmaxB and yminA <= ymaxB and zminA <= zmaxB  \
+    #     and xminB <= xmaxA and yminB <= ymaxA and zminB <= zmaxA
+    # if xmaxA < xminB or xminA > xmaxB:
+    #     return false
+    # if ymaxA < yminB or yminA > ymaxB:
+    #     return false
+    # if zmaxA < zminB or zminA > zmaxB:
+    #     return false
+    # return True
+
+
+# 测试 isTwoTrianglesIntersection1
+def TrianglesIntersection_part1(triL, triR):  # 线段在平面两侧
+    veczL = (triL[1] - triL[0]).cross(triL[2] - triL[0])
+    acrossR2L_A = (veczL.dot(triR[0] - triL[0])) * \
+        (veczL.dot(triR[1] - triL[0])) < eps  # 包括点在平面上
+    acrossR2L_B = (veczL.dot(triR[1] - triL[0])) * \
+        (veczL.dot(triR[2] - triL[0])) < eps
+    acrossR2L_C = (veczL.dot(triR[2] - triL[0])) * \
+        (veczL.dot(triR[0] - triL[0])) < eps
+    if not acrossR2L_A and not acrossR2L_B and not acrossR2L_C:
+        return False
+    veczR = (triR[1] - triR[0]).cross(triR[2] - triR[0])
+    acrossL2R_A = (veczR.dot(triL[0] - triR[0])) * \
+        (veczR.dot(triL[1] - triR[0])) < eps
+    acrossL2R_B = (veczR.dot(triL[1] - triR[0])) * \
+        (veczR.dot(triL[2] - triR[0])) < eps
+    acrossL2R_C = (veczR.dot(triL[2] - triR[0])) * \
+        (veczR.dot(triL[0] - triR[0])) < eps
+    if not acrossL2R_A and not acrossL2R_B and not acrossL2R_C:
+        return False
+
+    return True
+
+
+def TrianglesIntersection_part1_(triL, triR, mat=g_matrixE):
+    res0 = TrianglesIntersection_part1(mat*triL, mat*triR)
+    res1 = TrianglesIntersection_part1(mat*triR, mat*triL)
+    if (res0 != res1):
+        raise ValueError("-------")
+    return res0
+
+
+def is_straddling_test(segm, edge) -> bool:
+    # 如果两线段相交，则两线段必然相互跨立对方.若A1A2跨立B1B2，则矢量(A1-B1) 和(A2-B1)位于矢量(B2-B1)的两侧
+    # (A1-B1) × (B2-B1) * (B2-B1) × (A2-A1) >= 0
+    # (B1-A1) × (A2-A1) * (A2-A1) × (B2-A1) >= 0
+
+    isStra = (edge[0]-segm[0]).cross(segm[1]-segm[0]).dot(
+             (segm[1]-segm[0]).cross(edge[1]-segm[0])) > _eps
+    if (edge[0]-segm[0]).cross(segm[1]-segm[0]).dot(
+            (segm[1]-segm[0]).cross(edge[1]-segm[0])) < _eps:
+        return false
+    if (segm[0]-edge[0]).cross(edge[1]-edge[0]).dot(
+            (edge[1]-edge[0]).cross(segm[1]-edge[0])) < _eps:
+        return false
+    return true
+
+    return not((edge[0]-segm[0]).cross(segm[1]-segm[0]).dot((segm[1]-segm[0]).cross(edge[1]-segm[0])) < _eps or
+               (segm[0]-edge[0]).cross(edge[1]-edge[0]).dot((edge[1]-edge[0]).cross(segm[1]-edge[0])) < _eps)

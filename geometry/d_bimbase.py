@@ -95,3 +95,8 @@ TIT = (count_boxA+count_boxB)*12  # 34508748, 实际29269473，pointInBox
 # <linkage count_clash_hard="4010" count_clash_soft="1421"/>
 #
 
+# world_bounding
+min=(4922894.8119346518, -394596.74470618460, -713.30000000003395)
+max=(4960072.4308131514, -373195.18308180763, 25620.8149999999150)
+
+

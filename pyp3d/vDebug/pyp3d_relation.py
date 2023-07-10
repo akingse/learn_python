@@ -183,6 +183,19 @@ def is_two_line_intersect(lineA: Segment, lineB: Segment, isLineA=False, isLineB
     maxl = max(norm(segm0), norm(segm1), norm(line0), norm(line1))+1
     return "SEGMENT_INTER" if (abs(stra) < maxl*PL_A or stra <= 0) else "SEGMENT_SEPA"
 
+# 两个线段是否相交
+def is_two_segment_intersect(segmA: Segment, segmB: Segment) -> bool:
+    p1 = segmA.start
+    p2 = segmA.end
+    p3 = segmB.start
+    p4 = segmB.end
+    if ((p2-p1).cross(p3-p1).dot(p4-p1)>PL_A): #copplanar
+        return False
+    # double straddle
+    straA = dot(cross(p1-p3, p4-p3), cross(p2-p3, p4-p3))
+    straB = dot(cross(p4-p1, p2-p1), cross(p3-p1, p2-p1))
+    maxl = max(norm(p1), norm(p2), norm(p3), norm(p4))+1
+    return straA < maxl*PL_A and straB < maxl*PL_A 
 
 # 两条线段分离的快速算法
 def is_two_segments_intersect_2D(segmA: Segment, segmB: Segment, ignoreZero=True) -> bool:

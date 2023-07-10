@@ -31,11 +31,11 @@ def isTwoTrianglesIntersection2D(triA, triB):
 
 
 triA = [Vec3(0, 0), Vec3(100, 0), Vec3(50, 100)]
-triB = trans(0, 100)*triA
+triB = roty(pi/6)*trans(0, 100)*triA
 triA = rotz(pi/6)*trans(200, 0, 100)*triA
 create_geometry(Section(triA).colorBlue())
 create_geometry(Section(triB).colorGreen())
-isTwoTrianglesIntersection(triA, triB)
+isTwoTrianglesIntersectionSAT(triA, triB)
 
 isTwoTrianglesIntersection2D(triA, triB)
 

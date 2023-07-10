@@ -165,40 +165,95 @@ def is_segment_cross_triangle_surface(segment, trigon):
     #     return True
 
 
-def isTwoTrianglesIntersection(triA, triB) -> bool:
+def isTwoTrianglesIntersectionSAT(triA, triB) -> bool:
     edgesA = [triA[1] - triA[0], triA[2] - triA[1], triA[0] - triA[2]]
     edgesB = [triB[1] - triB[0], triB[2] - triB[1], triB[0] - triB[2]]
-    axes = [edgesA[0].cross(edgesB[0]),
-            edgesA[0].cross(edgesB[1]),
-            edgesA[0].cross(edgesB[2]),
-            edgesA[1].cross(edgesB[0]),
-            edgesA[1].cross(edgesB[1]),
-            edgesA[1].cross(edgesB[2]),
-            edgesA[2].cross(edgesB[0]),
-            edgesA[2].cross(edgesB[1]),
-            edgesA[2].cross(edgesB[2]),
-            edgesA[0],
-            edgesA[1],
-            edgesA[2],
-            edgesB[0],
-            edgesB[1],
-            edgesB[2]]
+    isNorm = False
+    if isNorm:
+        axes = [(edgesA[0].cross(edgesB[0])).normalized(),
+                (edgesA[0].cross(edgesB[1])).normalized(),
+                (edgesA[0].cross(edgesB[2])).normalized(),
+                (edgesA[1].cross(edgesB[0])).normalized(),
+                (edgesA[1].cross(edgesB[1])).normalized(),
+                (edgesA[1].cross(edgesB[2])).normalized(),
+                (edgesA[2].cross(edgesB[0])).normalized(),
+                (edgesA[2].cross(edgesB[1])).normalized(),
+                (edgesA[2].cross(edgesB[2])).normalized(),
+                (edgesA[0]).normalized(),
+                (edgesA[1]).normalized(),
+                (edgesA[2]).normalized(),
+                (edgesB[0]).normalized(),
+                (edgesB[1]).normalized(),
+                (edgesB[2]).normalized()]
+    else:
+        axes = [edgesA[0],
+                edgesA[1],
+                edgesA[2],
+                edgesB[0],
+                edgesB[1],
+                edgesB[2],
+                edgesA[0].cross(edgesB[0]),
+                edgesA[0].cross(edgesB[1]),
+                edgesA[0].cross(edgesB[2]),
+                edgesA[1].cross(edgesB[0]),
+                edgesA[1].cross(edgesB[1]),
+                edgesA[1].cross(edgesB[2]),
+                edgesA[2].cross(edgesB[0]),
+                edgesA[2].cross(edgesB[1]),
+                edgesA[2].cross(edgesB[2])]
+    # for axis in axes:
+    #     create_geometry(Line(Vec3(),axis).colorRand())
+    # show_points_line([triA[0],triA[1]])
+    # show_points_line([triB[0],triB[1]])
+    # show_points_line([triB[0],triB[0]+edgesA[0]])
+    # create_geometry(Line(Vec3(),axes[0]).colorRand())
     for axis in axes:
-        create_geometry(Line(Vec3(),axis).colorRand())
-    for axis in axes:
-        dotA0 = axis.dot(triA[0])
-        dotA1 = axis.dot(triA[1])
-        dotA2 = axis.dot(triA[2])
-        dotB0 = axis.dot(triB[0])
-        dotB1 = axis.dot(triB[1])
-        dotB2 = axis.dot(triB[2])
+        dotA0 = triA[0].dot(axis)
+        dotA1 = triA[1].dot(axis)
+        dotA2 = triA[2].dot(axis)
+        dotB0 = triB[0].dot(axis)
+        dotB1 = triB[1].dot(axis)
+        dotB2 = triB[2].dot(axis)
         minA = min(min(dotA0, dotA1), dotA2)
         maxA = max(max(dotA0, dotA1), dotA2)
         minB = min(min(dotB0, dotB1), dotB2)
         maxB = max(max(dotB0, dotB1), dotB2)
-        if maxA - minB < eps or maxB - minA < eps:
+        if maxA < minB or maxB < minA:
+        # if maxA + eps < minB or maxB + eps < minA:
             return False
     return True
+
+def isSegmentAndTriangleIntersctSAT(segment, trigon):
+    vecZ=(trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
+    if (abs(vecZ.dot(segment[0] - trigon[0]))<eps and abs(vecZ.dot(segment[1] - trigon[0]))<eps): # the coplanar
+        axes = [vecZ.cross(segment[1] - segment[0]),
+                vecZ.cross(trigon[1] - trigon[0]),
+                vecZ.cross(trigon[2] - trigon[1]),
+                vecZ.cross(trigon[0] - trigon[2]) ]
+    else:
+        edges = [trigon[1] - trigon[0], trigon[2] - trigon[1], trigon[0] - trigon[2]]
+        vecSeg = segment[1] - segment[0]
+        axes = [edges[0],
+                edges[1],
+                edges[2],
+                vecSeg,
+                vecSeg.cross(edges[0]),
+                vecSeg.cross(edges[1]),
+                vecSeg.cross(edges[2]) ]
+    for axis in axes:
+        dotA0 = trigon[0].dot(axis)
+        dotA1 = trigon[1].dot(axis)
+        dotA2 = trigon[2].dot(axis)
+        dotB0 = segment[0].dot(axis)
+        dotB1 = segment[1].dot(axis)
+        minA = min(min(dotA0, dotA1), dotA2)
+        maxA = max(max(dotA0, dotA1), dotA2)
+        minB = min(dotB0, dotB1)
+        maxB = max(dotB0, dotB1)
+        if maxA < minB or maxB < minA:
+            return False
+    return True
+
 
 
 def isTriangleBoundingBoxIntersect(trigon: list, box: list) -> bool:
@@ -240,7 +295,7 @@ def isTriangleBoundingBoxIntersect(trigon: list, box: list) -> bool:
                  [Vec3(vertex.x, 0, 0), Vec3(vertex.x, vertex.y, 0), vertex],
                  [Vec3(vertex.x, 0, 0), Vec3(vertex.x, 0, vertex.z), vertex]]
     for iter in triTwelve:
-        if isTwoTrianglesIntersection([pO0, pO1, pO2], iter):
+        if isTwoTrianglesIntersectionSAT([pO0, pO1, pO2], iter):
             return true
     return false
 

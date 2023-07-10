@@ -491,13 +491,14 @@ class GeVec3d(BufferStackBase):
         return sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
     def norm2(self):
         return self.x*self.x+self.y*self.y+self.z*self.z
-
     def unitize(self):
         n = self.norm()
         if n < PL_A:
             return GeVec3d(0, 0, 0)
         else:
             return GeVec3d(self.x/n, self.y/n, self.z/n)
+    def normalized(self):
+        return self.unitize()
     def isOrigin(self):
         return self.norm() < PL_A
     def isValid(self):

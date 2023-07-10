@@ -31,21 +31,6 @@ p1 = Point(1, 2, 3)
 def _get_point()->list:
     return [randint(-100, 100),randint(-100, 100)]
 
-def _get_rand_point(is2D=True) -> GeVec3d:
-    rg = 100
-    if is2D:
-        return GeVec3d(randint(-rg, rg), randint(-rg, rg))
-    else:
-        return GeVec3d(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
-
-
-def _gen_rand_point(is2D=True) -> Point:
-    rg = 100
-    if is2D:
-        return Point(randint(-rg, rg), randint(-rg, rg), 0)
-    else:
-        return Point(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
-
 
 def _show_close_line(points: list):
     if len(points) == 0:
@@ -70,17 +55,6 @@ def _is_point_in_triangle(point, trigon: list) -> bool:
     # r2 = abs(norm(sdA)*norm(sdC)-dot(sdA, sdC))
     return abs(norm(sdA)*norm(sdB)-dot(sdA, sdB)) < PL_A and abs(norm(sdA)*norm(sdC)-dot(sdA, sdC)) < PL_A
     # return abs(norm_2(sdA)*norm_2(sdB)-dAB*dAB) < PL_A and abs(norm_2(sdA)*norm_2(sdC)-dAC*dAC) < PL_A
-
-
-def _is_point_in_circumcircle(pO, trigon: list) -> bool:
-    pA = trigon[0]
-    pB = trigon[1]
-    pC = trigon[2]
-    M = np.mat([[pA.x, pA.y, pA.x*pA.x+pA.y*pA.y, 1.0],
-                [pB.x, pB.y, pB.x*pB.x+pB.y*pB.y, 1.0],
-                [pC.x, pC.y, pC.x*pC.x+pC.y*pC.y, 1.0],
-                [pO.x, pO.y, pO.x*pO.x+pO.y*pO.y, 1.0]])
-    return np.linalg.det(M) <= 0
 
 
 def _is_point_in_triangle1(point, trigon: list) -> bool:
@@ -127,11 +101,11 @@ def _get_circumcircle_center1(trigon: list) -> GeVec3d:
     return pointC
 
 
-def _get_circumcircle_center(trigon: list) -> GeVec3d:
+def _get_circumcircle_center(trigon: list, point: GeVec3d = GeVec3d()) -> GeVec3d:
     # _inverse_2x2
-    x1,y1 = trigon[0].x,trigon[0].y
-    x2,y2 = trigon[1].x,trigon[1].y
-    x3,y3 = trigon[2].x,trigon[2].y
+    x1, y1 = trigon[0].x, trigon[0].y
+    x2, y2 = trigon[1].x, trigon[1].y
+    x3, y3 = trigon[2].x, trigon[2].y
     m1 = 2*(x2-x1)
     n1 = 2*(y2-y1)
     k1 = x2*x2-x1*x1+y2*y2-y1*y1
@@ -141,11 +115,40 @@ def _get_circumcircle_center(trigon: list) -> GeVec3d:
     k = (m1*n2-n1*m2)
     if (k == 0):  # is_float_zero(k)
         return g_axisNaN
-    return GeVec3d((n2*k1-n1*k2)/k, (-m2*k1+m1*k2)/k)
+    pointC = GeVec3d((n2*k1-n1*k2)/k, (-m2*k1+m1*k2)/k)
+    return pointC
     # pointC = GeVec3d(1/k*dot(GeVec3d(n2, -n1), GeVec3d(k1, k2)),
     #                  1/k*dot(GeVec3d(-m2, m1), GeVec3d(k1, k2)))
-    return pointC
+    # return norm_2(trigon[0]-pointC) < norm_2(point-pointC)
     # return trans(pointC)*scale(norm(pointC-trigon[0]))
+
+def _is_point_in_circumcircle0(point, trigon: list) -> bool:
+    # 函数调用，对象传递约增加20%耗时
+    # pointC=_get_circumcircle_center(trigon)
+    x1, y1 = trigon[0].x, trigon[0].y
+    x2, y2 = trigon[1].x, trigon[1].y
+    x3, y3 = trigon[2].x, trigon[2].y
+    m1 = 2*(x2-x1)
+    n1 = 2*(y2-y1)
+    k1 = x2*x2-x1*x1+y2*y2-y1*y1
+    m2 = 2*(x3-x1)
+    n2 = 2*(y3-y1)
+    k2 = x3*x3-x1*x1+y3*y3-y1*y1
+    k = (m1*n2-n1*m2)
+    if (k == 0):  # is_float_zero(k)
+        return g_axisNaN
+    pointC = GeVec3d((n2*k1-n1*k2)/k, (-m2*k1+m1*k2)/k)
+    return norm_2(trigon[0]-pointC) < norm_2(point-pointC)
+
+def _is_point_in_circumcircle(pO, trigon: list) -> bool:
+    pA = trigon[0]
+    pB = trigon[1]
+    pC = trigon[2]
+    M = np.mat([[pA.x, pA.y, pA.x*pA.x+pA.y*pA.y, 1.0],
+                [pB.x, pB.y, pB.x*pB.x+pB.y*pB.y, 1.0],
+                [pC.x, pC.y, pC.x*pC.x+pC.y*pC.y, 1.0],
+                [pO.x, pO.y, pO.x*pO.x+pO.y*pO.y, 1.0]])
+    return np.linalg.det(M) <= 0
 
 def _get_circumcircle_center2(trigon: list) -> list:
     # _inverse_2x2
@@ -166,8 +169,8 @@ def _get_circumcircle_center2(trigon: list) -> list:
 
 
 
-RP = _get_rand_point
-GP = _gen_rand_point
+RP = get_rand_point
+# GP = gen_rand_point
 
 if __name__ == '__main__':
     for i in range(int(1e2)):
@@ -199,10 +202,56 @@ if __name__ == '__main__':
         # res = _is_point_in_triangle1(GP(), [GP(), GP(), GP()])
 
         # res = _get_circumcircle_center([RP(), RP(), RP()])
-        res = _get_circumcircle_center2([_get_point(), _get_point(), _get_point()])
+        # res = _is_point_in_circumcircle0(RP(),[RP(), RP(), RP()])
         # res = _get_circumcircle_center1([RP(), RP(), RP()])
-        # res = _is_point_in_circumcircle([RP(), RP(), RP()])
+        res = _is_point_in_circumcircle(RP(),[RP(), RP(), RP()])
         pass
     print(time.time()-tStart)
     # create_geometry(scale(100)*Arc())
     a=1
+
+
+
+'''
+/*
+ * ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐
+ * │Esc│   │ F1│ F2│ F3│ F4│ │ F5│ F6│ F7│ F8│ │ F9│F10│F11│F12│ │P/S│S L│P/B│
+ * └───┘   └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┘
+ * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───────┐ ┌───┬───┬───┐
+ * │~ `│! 1│@ 2│# 3│$ 4│% 5│^ 6│& 7│* 8│( 9│) 0│_ -│+ =│ BacSp │ │Ins│Hom│PUp│
+ * ├───┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─────┤ ├───┼───┼───┤
+ * │ Tab │ Q │ W │ E │ R │ T │ Y │ U │ I │ O │ P │{ [│} ]│ | \ │ │Del│End│PDn│
+ * ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤ └───┴───┴───┘
+ * │ Caps │ A │ S │ D │ F │ G │ H │ J │ K │ L │: ;│" '│ Enter  │              
+ * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────────┤     ┌───┐    
+ * │ Shift  │ Z │ X │ C │ V │ B │ N │ M │< ,│> .│? /│  Shift   │     │ ↑ │    
+ * ├─────┬──┴─┬─┴──┬┴───┴───┴───┴───┴───┴──┬┴───┼───┴┬────┬────┤ ┌───┼───┼───┐
+ * │ Ctrl│ Wn │Alt │         Space         │ Alt│ Fn │ ME │Ctrl│ │ ← │ ↓ │ → │
+ * └─────┴────┴────┴───────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
+ */
+'''
+
+
+
+
+
+'''
+/*
+ * ┌───┐   ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┬───┐ ┌───┬───┬───┐
+ * │Esc│   │ F1│ F2│ F3│ F4│ │ F5│ F6│ F7│ F8│ │ F9│F10│F11│F12│ │P/S│S L│P/B│
+ * └───┘   └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┴───┘ └───┴───┴───┘
+ * ┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───────┐ ┌───┬───┬───┐
+ * │~ `│! 1│@ 2│# 3│$ 4│% 5│^ 6│& 7│* 8│( 9│) 0│_ -│+ =│ BacSp │ │Ins│Hom│PUp│
+ * ├───┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─────┤ ├───┼───┼───┤
+ * │ Tab │ Q │ W │ E │ R │ T │ Y │ U │ I │ O │ P │{ [│} ]│ | \ │ │Del│End│PDn│
+ * ├─────┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴┬──┴─────┤ └───┴───┴───┘
+ * │ Caps │ A │ S │ D │ F │ G │ H │ J │ K │ L │: ;│" '│ Enter  │              
+ * ├──────┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴─┬─┴────────┤     ┌───┐    
+ * │ Shift  │ Z │ X │ C │ V │ B │ N │ M │< ,│> .│? /│  Shift   │     │ ↑ │    
+ * ├─────┬──┴─┬─┴──┬┴───┴───┴───┴───┴───┴──┬┴───┼───┴┬────┬────┤ ┌───┼───┼───┐
+ * │ Ctrl│ Wn │Alt │         Space         │ Alt│ Fn │ ME │Ctrl│ │ ← │ ↓ │ → │
+ * └─────┴────┴────┴───────────────────────┴────┴────┴────┴────┘ └───┴───┴───┘
+ */
+'''
+
+

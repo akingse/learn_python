@@ -6,7 +6,7 @@
 
 from copy import deepcopy
 from .pyp3d_api import *
-import winsound
+# import winsound
 
 # ------------------------------------------------------------------------------------------
 # |                                          ARC                                           |
@@ -94,11 +94,12 @@ def arc_of_radius_points_2D(pStart: GeVec2d, pEnd: GeVec2d, R: float) -> Arc:
     pCenter = transM*GeVec3d(d/2, R*cos(thetaScope), 0)
     theta = atan2(p1.y-pCenter.y, p1.x-pCenter.x)
     return trans(pCenter)*scale(abs(R))*rotz(theta)*Arc(2*thetaScope)
+
+
 arc_of_radius_points = arc_of_radius_points_2D
 
+
 # 三点组成线段，倒角圆弧
-
-
 def arc_of_segments_bevel(points: list,  R: float) -> Arc:
     # arc_of_segments_chamfer
     if len(points) != 3:
@@ -130,7 +131,7 @@ def arc_of_tangent_radius_2D(posVec: PosVec, R: float, scope: float) -> Arc:
     # yc=pos.y+R*cos(theta)
     pCenter = GeVec3d(pos.x-R*sin(theta), pos.y+R * cos(theta))
     return trans(pCenter)*scale(abs(R))*rotz(atan2(pos.y-pCenter.y, pos.x-pCenter.x))*Arc(scope)
-    temp_arc = trans(point)*rotz(pi-angle)*trans(-R,0,0)*scale(R)*Arc(-scope)
+    # temp_arc = trans(point)*rotz(pi-angle)*trans(-R, 0, 0)*scale(R)*Arc(-scope)
 
 
 # 用5个点生成椭圆
@@ -644,8 +645,8 @@ def print_vector(*args) -> None:
 
 def print_result(res: bool) -> None:
     print("test pass") if (res) else print("test error!!!!!!!!!!!!!!!!!!!!")
-    if not res:
-        winsound.Beep(800, 1000)
+    # if not res:
+    #     winsound.Beep(800, 1000)
 
 
 # to wangqingwei

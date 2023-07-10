@@ -2,9 +2,11 @@
 # Brief: 运行时服务，具体包括函数静动态调用，模块动态加卸载，动态对象申请释放。
 # Author: YouQi
 # Date: 2021/05/10
+
+from asyncio import subprocess
 from ..serialization import *
 from ._communication import *
-import re, sys, os, imp, threading
+import re, sys, os, imp, threading, queue, multiprocessing
 from types import FunctionType, MethodType
 class _SingletonClassParent:
     _ins = {}
@@ -75,7 +77,14 @@ def set_global_variable(key:str, val):
     global _globalData
     _globalData[key] = val
 def get_global_variable(key:str):
-    return _globalData[key] if(key in _globalData) else ''
+    if key in _globalData:
+        return _globalData[key]
+    else:
+        return ''
+def isinside_global_variable(key:str):
+    if key in _globalData.keys():
+        return True
+    return False
 # import pyp3d as p3d
 def run_script(scriptPath:str):
     global __name__, _globalSource, _globalScript
@@ -97,6 +106,8 @@ def runtime_is_service():
 @singleton
 class _Core(threading.Thread):
     def __init__(self, name, daemon):
+        if get_global_variable('__mannerOfImport') == 'Subprocess':
+            raise RuntimeError('The subprocess is prohibited from communicating with the BIMBase main process.')
         global _isService
         _isService = name == b'service'
         self._buffer = None
@@ -291,6 +302,117 @@ def getattr_from(name, attr): return _UnifiedModule()._getattr(name, attr)
 def nonstatic_call_forwarding(uf, this, args):
     res = _UnifiedModule()(uf._moduleName, uf._methodName, this, *args)
     return [this, res]
+def toolevent_call_forwarding(uf, this, args):
+    parts = uf._methodName.split('.')
+    part = re.findall(r'([a-zA-Z]:.*[\\/]+)*([\w\-\s（）()\.]+)', uf._moduleName)
+    if len(part)==0:
+        raise RuntimeError('[_import] format error!')
+    sys.path.append(part[0][0])
+    tmpres = __import__(part[0][1])
+    for part in parts :
+        names = dir(tmpres)
+        if part in names:
+           res = _UnifiedModule()(uf._moduleName, uf._methodName, this, *args)
+           return [this, res]
 PARACMPT_PARAMETRIC_COMPONENT = 'BPParametricComponent'
 def exe_command(command:str):
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, "exe_command")(command)
+
+import threading, multiprocessing, queue
+
+class _Consignee(threading.Thread):
+    '''
+    收货方
+    '''
+    def __init__(self, processQueue=None):
+        threading.Thread.__init__(self)
+        self._processQueue = multiprocessing.Queue() if processQueue is None else processQueue
+        self._localQueue = queue.Queue()
+        self._threadLife = True
+        self.start()
+    def __del__(self):
+        self._processQueue.close()
+        self.join()
+        self.close()
+    def run(self):
+        while self._threadLife:
+            obj = self._processQueue.get()
+            if obj is None:
+                break
+            self._localQueue.put(obj)
+        self._threadLife = False
+    def close(self):
+        if self._threadLife:
+            self._processQueue.put(None)
+            self._threadLife = False
+    def get(self, _block):
+        '''
+        取货
+        '''
+        while True:
+            try:
+                return self._localQueue.get(False)
+            except queue.Empty: 
+                if _block:
+                    continue
+                else:
+                    break
+        return None
+g_mainConsignee = None
+def main_consignee()->_Consignee:
+    global g_mainConsignee
+    if g_mainConsignee is None:
+        g_mainConsignee = _Consignee() 
+    return g_mainConsignee
+def clear_main_consignee():
+    global g_mainConsignee
+    if g_mainConsignee is None:
+        return
+    g_mainConsignee.close()
+    g_mainConsignee = None
+class MainProcessPort:
+    def __init__(self, mainProcessQueue:multiprocessing.Queue, subprocessQueue:multiprocessing.Queue):
+        self._mainProcessQueue = mainProcessQueue
+        self._consignee = _Consignee(subprocessQueue)
+    def __del__(self):
+        self._consignee.close()
+        self._mainProcessQueue.close()
+    def send(self, *args):
+        self._mainProcessQueue.put(args)
+    def recv(self, _block=False):
+        return self._consignee.get(_block)
+
+class Pyp3dSubprocess(multiprocessing.Process):
+    def __init__(self, targe,args):
+        multiprocessing.Process.__init__(self, target=self.run, args=(self,))
+        self._targe = targe
+        self._args = args
+        self._mainProcessQueue = main_consignee()._processQueue
+        self._subprocessQueue = multiprocessing.Queue()
+        sys.path.append('*'+str(get_global_variable('__version')))
+        self.start()
+    def __del__(self):
+        self._subprocessQueue.close()
+        time.sleep(1)
+        self._mainProcessQueue.close()
+    def run(self):
+        mainProcessPort = MainProcessPort(self._mainProcessQueue, self._subprocessQueue)
+        self._targe(mainProcessPort,self._args)
+        mainProcessPort._consignee.close()
+        print("run exit")
+    def send(self, *args):
+        self._subprocessQueue.put(args)
+    def recv(self, _block=False):
+        return main_consignee().get(_block)
+    def suicide(self):
+        self.join()
+        self.close()
+
+g_subprocess = dict()
+def setPyp3dSubprocess(process:Pyp3dSubprocess, index=0):
+    global g_subprocess
+    if process is None and g_subprocess[index] is not None:
+        g_subprocess[index].suicide()
+    g_subprocess[index] = process
+def getPyp3dSubprocess(index=0):
+    return g_subprocess[index]

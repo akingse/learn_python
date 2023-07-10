@@ -140,7 +140,7 @@ def get_angle_of_two_segments(segmA: Segment, segmB: Segment) -> float:
     return get_angle_of_two_vectors(segmA[1]-segmA[0], segmB[1]-segmB[0])
 
 
-def straight_sweep(section: Section, line: Line) -> Loft:  # 平面直线扫掠函数
+def sweep_straight(section: Section, line: Line) -> Loft:  # 平面直线扫掠函数
     section = roty(-pi/2)*section
     points = get_nested_parts_from_line(line)  # line.parts
     points = remove_coincident_point(points)
@@ -178,11 +178,14 @@ judge_polygon_surface = get_surface_of_polygon
 points_to_segments = get_segments_from_points
 is_point_locate_on_plane = is_point_on_plane
 is_vertical = is_perpendi
+straight_sweep = sweep_straight
 
 # pyp3d_component
 combine = Combine
 GeLineString = Line
-PointString = GePoint
+LineString = Line
+PointString = Point
+GePoint=Point
 # pyp3d_matrix
 rotation = rotate
 translate = trans
@@ -190,3 +193,5 @@ translation = trans
 reflect = mirror
 inverse_std = inverse_orth
 arbitrary_rotate = rotate_arbitrary
+scale_shadow_matrix = shadow_scale_matrix
+vector_shadow_matrix = shadow_vector_matrix_2D

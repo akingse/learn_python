@@ -458,10 +458,10 @@ class GeVec3d(BufferStackBase):
             raise TypeError('improper parameter!')
 
     def __lt__(self, a):
-        return True if sqrt(self.x*self.x+self.y*self.y+self.z*self.z) < sqrt(a.x*a.x+a.y*a.y+a.z*a.z) else False
+        return sqrt(self.x*self.x+self.y*self.y+self.z*self.z) < sqrt(a.x*a.x+a.y*a.y+a.z*a.z)
 
     def __eq__(self, other) -> bool:
-        return True if ((self - other).norm() < PL_E8) else False
+        return (self - other).norm() < PL_E8
 
     def __hash__(self) -> int:
         return super().__hash__()
@@ -489,13 +489,16 @@ class GeVec3d(BufferStackBase):
 
     def norm(self):
         return sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
-
+    def norm2(self):
+        return self.x*self.x+self.y*self.y+self.z*self.z
     def unitize(self):
         n = self.norm()
         if n < PL_A:
             return GeVec3d(0, 0, 0)
         else:
             return GeVec3d(self.x/n, self.y/n, self.z/n)
+    def normalized(self):
+        return self.unitize()
     def isOrigin(self):
         return self.norm() < PL_A
     def isValid(self):
@@ -504,6 +507,10 @@ class GeVec3d(BufferStackBase):
         if (isinf(self.x) or isinf(self.y) or isinf(self.z)):
             return False
         return True
+    def cross(self,val): #->GeVec3d
+        return GeVec3d(self.y*val.z-self.z*val.y, self.z*val.x-self.x*val.z, self.x*val.y-self.y*val.x)
+    def dot(self,val)->float:
+        return self.x*val.x + self.y*val.y + self.z*val.z
 
 class GeVec2d(BufferStackBase):
     def __init__(self, *args):  # self.x, self.y = x, y

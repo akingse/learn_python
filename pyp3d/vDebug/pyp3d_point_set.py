@@ -29,7 +29,7 @@ def get_matrix_from_two_points(point0: GeVec3d, point1: GeVec3d, isAxisZ=True) -
         temp = axisZ
         axisZ = axisX
         axisX = temp
-        axisY = (-1)*axisY
+        axisY = (-1.0)*axisY
     return set_matrix_by_column_vectors(axisX, axisY, axisZ, point0)
 
 
@@ -98,7 +98,7 @@ def get_matrix_from_points(points: list, is2D=True) -> GeTransform:  # 用多个
     return GeTransform() if (is_two_dimensional_matrix(forwM) and is2D) else forwM
 
 
-def get_arc_from_three_points(args:list)->tuple:  # 用且仅用3个点生成圆弧（矩阵和圆弧角）
+def get_arc_from_three_points(args: list) -> tuple:  # 用且仅用3个点生成圆弧（矩阵和圆弧角）
     args = copy.deepcopy(args)
     if len(args) != 3:
         raise TypeError("get_arc_from_three_points number error!")
@@ -242,13 +242,15 @@ def get_much_offset_points_from_two_points(segment: list, num: int, isStart=True
 def is_point_on_plane(point: GeVec3d, plane: GeTransform) -> bool:
     pointO = get_matrixs_position(plane)  # the original point
     vectorZ = get_matrixs_axisz(get_orthogonal_matrix(plane))
-    return True if abs(dot(vectorZ, point - pointO)) < PL_E8 else False
+    return is_perpendi(vectorZ, point - pointO)
+    # return abs(dot(vectorZ, point - pointO)) < PL_E8
 
 
 # 获取点到平面的距离（矩阵XOY面）
 def get_distance_of_point_plane(point: GeVec3d, plane: GeTransform, isAbs=True) -> float:
     pointRela = inverse_orth(get_orthogonal_matrix(plane))*point
-    return abs(pointRela.z) if isAbs else pointRela.z  # relative value, with sign
+    # relative value, with sign
+    return abs(pointRela.z) if isAbs else pointRela.z
 
 
 # 三点平面生成镜像矩阵
@@ -295,7 +297,7 @@ def is_point_in_triangle(point: GeVec3d, trigon: list) -> bool:  # 点是否在�
     s1 = get_surface_of_triangle([point, trigon[0], trigon[1]])
     s2 = get_surface_of_triangle([point, trigon[1], trigon[2]])
     s3 = get_surface_of_triangle([point, trigon[2], trigon[0]])
-    # return True if abs(sS-s1-s2-s3) < PL_A else False
+    # return abs(sS-s1-s2-s3) < PL_A
     # vector cross product
     pA = trigon[0]
     pB = trigon[1]
@@ -305,15 +307,12 @@ def is_point_in_triangle(point: GeVec3d, trigon: list) -> bool:  # 点是否在�
         cross(pB-pA, point-pA), cross(pC-pA, point-pA))
     betB = is_two_vectors_same_direction(
         cross(pA-pB, point-pB), cross(pC-pB, point-pB))
-    # return True if ((betA == "DIRECTION_OPPO" or betA == "DIRECTION_ANY") and
-    #                 (betB == "DIRECTION_OPPO" or betB == "DIRECTION_ANY")) else False
     # points locate on same side.
     sdA = cross(point-pA, pB-pA)
     sdB = cross(point-pB, pC-pB)
     sdC = cross(point-pC, pA-pC)
     # same direction
-    return True if (abs(norm(sdA)*norm(sdB)-dot(sdA, sdB)) < PL_A and
-                    abs(norm(sdA)*norm(sdC)-dot(sdA, sdC)) < PL_A) else False
+    return abs(norm(sdA)*norm(sdB)-dot(sdA, sdB)) < PL_A and abs(norm(sdA)*norm(sdC)-dot(sdA, sdC)) < PL_A
 
 
 def get_surface_of_polygon(points: list) -> float:  # 通过面积判断二维多边形方向

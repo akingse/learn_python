@@ -8,8 +8,8 @@ from pyp3d import *
 # color(0, 1, 0)
 # color(0, 0, 1)
 
-line=Line(GeVec3d(),GeVec3d(),GeVec3d())
-a=len(line.parts)
+line = Line(GeVec3d(), GeVec3d(), GeVec3d())
+a = len(line.parts)
 
 is_line_on_same_plane
 get_nested_parts_from_line
@@ -171,6 +171,7 @@ def get_discrete_points_from_ellipse(arc: Arc, n: int = 0, withEnd=False) -> lis
 # 离散圆弧计算坐标,累加norm
 # 想不三，由于大量三角函数计算，效率差一倍
 
+
     def _distance(point1, point2):
         return sqrt((point2[1]-point1[1])**2 + (point2[0]-point1[0])**2)
 
@@ -274,16 +275,6 @@ points = test_cos()
 # print(exp(2))
 # print(pow(e, 2))
 
-
-arc = trans(50, 50)*scale(20)*Arc(pi/1)
-sec1 = trans(0, 0, 100)*Section(arc, rotz(pi/2) * arc,
-                                rotz(pi)*arc, rotz(-pi/2)*arc)
-point1 = Vec3(100, 80)
-point2 = Vec3(80, 100)
-sec2 = Section(point1, point2, rotz(pi/2)*point1, rotz(pi/2)*point2,
-               rotz(pi)*point1, rotz(pi)*point2, rotz(-pi/2)*point1, rotz(-pi/2)*point2)
-# geo = loft_different(sec1, sec2)
-# create_geometry(geo)
 
 # -------------------------------------------------------
 before = time.time()

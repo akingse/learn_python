@@ -231,8 +231,7 @@ def transpose(M: GeTransform, onlyRot=True) -> GeTransform:  # 获取矩阵的�
     # if not is_attitude_matrix(M):
     #     raise TypeError('must be unit attitude matrix!')
     matrix = GeTransform([[M._mat[0][0], M._mat[1][0], M._mat[2][0], 0*M._mat[0][3]],
-                          [M._mat[0][1], M._mat[1][1],
-                              M._mat[2][1], 0*M._mat[1][3]],
+                          [M._mat[0][1], M._mat[1][1], M._mat[2][1], 0*M._mat[1][3]],
                           [M._mat[0][2], M._mat[1][2], M._mat[2][2], 0*M._mat[2][3]]])
     return matrix
 
@@ -289,17 +288,17 @@ def inverse(M: GeTransform) -> GeTransform:  # 计算矩阵的逆矩阵
 # ------------------------------------------------------------------------------------------
 
 
-def set_matrix_by_column_vectors(vecX, vecY, vecZ, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过列矢量创建矩阵
+def set_matrix_by_column_vectors(vecX:GeVec3d, vecY:GeVec3d, vecZ:GeVec3d, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过列矢量创建矩阵
     matrix = GeTransform([[vecX.x, vecY.x, vecZ.x, p.x],
                           [vecX.y, vecY.y, vecZ.y, p.y],
                           [vecX.z, vecY.z, vecZ.z, p.z]])
     return matrix
 
 
-def set_matrix_by_row_vectors(vecA, vecB, vecC) -> GeTransform:  # 通过行矢量创建矩阵
-    matrix = GeTransform([[vecA.x, vecA.y, vecA.z, 0.0],
-                          [vecB.x, vecB.y, vecB.z, 0.0],
-                          [vecC.x, vecC.y, vecC.z, 0.0]])
+def set_matrix_by_row_vectors(vecA:GeVec3d, vecB:GeVec3d, vecC:GeVec3d, p=GeVec3d(0, 0, 0)) -> GeTransform:  # 通过行矢量创建矩阵
+    matrix = GeTransform([[vecA.x, vecA.y, vecA.z, p.x],
+                          [vecB.x, vecB.y, vecB.z, p.y],
+                          [vecC.x, vecC.y, vecC.z, p.z]])
     return matrix
 
 
@@ -446,7 +445,7 @@ def is_zero_matrix(M: GeTransform) -> bool:  # 是否为全零矩阵
     axisy = get_matrixs_axisy(M)
     axisz = get_matrixs_axisz(M)
     axisp = get_matrixs_position(M)
-    return True if norm(axisx)+norm(axisy)+norm(axisz)+norm(axisp) < PL_A else False
+    return norm(axisx)+norm(axisy)+norm(axisz)+norm(axisp) < PL_A
 
 
 def is_orthogonal_matrix(M: GeTransform, onlyRot=True) -> bool:  # 判断一个矩阵是否为单位正交矩阵
@@ -456,7 +455,7 @@ def is_orthogonal_matrix(M: GeTransform, onlyRot=True) -> bool:  # 判断一个�
         if (norm(pos) > PL_A):
             return False
     mat = get_matrixs_rotation(M)
-    return True if is_identify_matrix(mat*transpose(mat)) else False
+    return is_identify_matrix(mat*transpose(mat))
 
 
 def get_orthogonal_matrix(M: GeTransform, withTrans=True, is2D=False) -> GeTransform:  # 获取单位正交矩阵
@@ -507,7 +506,7 @@ def is_shadow_matrix_on_xoy(M: GeTransform, withTrans=False) -> bool:
     if withTrans and norm(pos) > PL_A:
         return False
     a, b, c = M._mat[2][0], M._mat[2][1], M._mat[2][2]
-    return True if (abs(a)+abs(b)+abs(c) < PL_A) else False
+    return abs(a)+abs(b)+abs(c) < PL_A
 
 
 def is_rigid_matrix(M: GeTransform) -> bool:  # 判断一个矩阵是否为刚性位姿矩阵（仅平移旋转变换）
@@ -546,7 +545,7 @@ def shadow_scale_matrix(intAngle=0) -> GeTransform:  # 绕Z轴放大投影矩阵
 
 def is_shadow_matrix_on_xoy(M: GeTransform) -> bool:  # 是否为xoy平面的投影矩阵
     c = get_matrixs_pose_row_vectors(M)[2]
-    return True if norm(c) < PL_A else False
+    return norm(c) < PL_A
 
 
 def get_full_rank_matrix_from_shadow(M: GeTransform, withTrans=True) -> GeTransform:
@@ -588,3 +587,13 @@ def get_trans_from_two_points(point1: GeVec3d, point2: GeVec3d) -> GeTransform:
             transformation = rotate(GeVec3d(0, 0, 1),  angle_xy) * rotate(
                 GeVec3d(0, 1, 0),  angle_z-pi/2)
             return transformation
+
+def isAcuteAngle(vecA: GeVec3d, vecB: GeVec3d)->bool:
+    return  vecA * vecB > 0
+
+def hasMatrixMirror( M:GeTransform)->bool:
+	axisx = get_matrixs_axisx(M)
+	axisy = get_matrixs_axisy(M)
+	axisz = get_matrixs_axisz(M)
+	# support shear, on the basis of the dierction range of coord-axis
+	return not (isAcuteAngle(axisx,axisy ^ axisz) and isAcuteAngle(axisy,axisz ^ axisx) and isAcuteAngle(axisz,axisx ^ axisy))

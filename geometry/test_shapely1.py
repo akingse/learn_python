@@ -11,10 +11,9 @@ from shapely import *
 import numpy as np
 import sys
 import os
-mypath = 'D:\Alluser\learn_python'  # include pyp3d
-mypath = r'C:\Users\wangk\source\repos\learn_python'  # include pyp3d
-sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
-from pyp3d import *  # NOQA: E402
+# mypath = 'D:\Alluser\learn_python'  # include pyp3d
+# sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
+# from pyp3d import *  # NOQA: E402
 
 
 
@@ -28,13 +27,3 @@ poly_union = gpd.GeoSeries([Polygon([(0,0), (0,2), (1,2), (1,3),
 # poly_union.plot(color = 'blue')
 # plt.show()
 
-
-line_1 = LineString([(0.1, 0.1), (2, 3)])
-b = line_1.buffer(0.5)
-intersection = line_1.intersection(b)
-x1, y1 = line_1.xy
-x2, y2 = b.boundary.xy
-plt.figure()
-plt.plot(x1, y1)
-plt.plot(x2, y2)
-plt.show()

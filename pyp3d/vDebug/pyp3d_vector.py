@@ -32,18 +32,19 @@ def is_all_vec(points) -> bool:
         if isinstance(iter, (GeVec2d, GeVec3d)):
             continue
         elif isinstance(iter, list):
-            is_all_vec(iter)
+            if not is_all_vec(iter):
+                return False
         else:
             return False
     return True
 
 
-def is_all_vec2(points) -> bool: return True if all(isinstance(i, GeVec2d)
-                                                    for i in points) else False
+def is_all_vec2(points) -> bool:
+    return all(isinstance(i, GeVec2d) for i in points)
 
 
-def is_all_vec3(points) -> bool: return True if all(isinstance(i, GeVec3d)
-                                                    for i in points) else False
+def is_all_vec3(points) -> bool:
+    return all(isinstance(i, GeVec3d) for i in points)
 
 
 def is_all_num(num) -> bool:  # 判断对象是否为数字
@@ -76,16 +77,18 @@ def norm(vec) -> float:  # 计算模长（二范数）
     else:
         raise ValueError('please input a vector!')
 
+
 def norm_2(vec) -> float:  # 计算模长的平方
     '''
     the absolute length of vector
     '''
     if isinstance(vec, GeVec2d):
-        return (vec.x*vec.x + vec.y*vec.y)
+        return vec.x*vec.x + vec.y*vec.y
     elif isinstance(vec, GeVec3d):
-        return (vec.x*vec.x + vec.y*vec.y + vec.z*vec.z)
+        return vec.x*vec.x + vec.y*vec.y + vec.z*vec.z
     else:
         raise ValueError('please input a vector!')
+
 
 def unitize(vec) -> GeVec3d:  # 计算单位矢量
     '''
@@ -233,7 +236,7 @@ def is_perpendi(vecA: GeVec3d, vecB: GeVec3d) -> bool:
     if(is_float_zero(vecA.norm()) or is_float_zero(vecB.norm())):  # zero vector be any direction
         return True
     maxl = norm(vecA) if (norm(vecA) > norm(vecB)) else norm(vecB)
-    return True if (abs(dot(vecA, vecB)) < (maxl+1) * PL_E8) else False
+    return abs(dot(vecA, vecB)) < (maxl+1) * PL_E8
 
 
 # is two vecotrs parallel (auto precision)
@@ -241,10 +244,10 @@ def is_parallel(vecA: GeVec3d, vecB: GeVec3d) -> bool:
     if(is_float_zero(vecA.norm()) or is_float_zero(vecB.norm())):  # zero vector be any direction
         return True
     maxl = norm(vecA) if (norm(vecA) > norm(vecB)) else norm(vecB)
-    return True if (norm(cross(vecA, vecB)) < (maxl+1) * PL_A) else False
+    return norm(cross(vecA, vecB)) < (maxl+1) * PL_E8
 
 
 # is two points coincident (auto precision)
 def is_coincident(pointA: GeVec3d, pointB: GeVec3d) -> bool:
     maxl = norm(pointA) if (norm(pointA) > norm(pointB)) else norm(pointB)
-    return True if (norm(pointA - pointB) <= (maxl+1) * PL_E8) else False
+    return norm(pointA - pointB) < (maxl+1) * PL_E8

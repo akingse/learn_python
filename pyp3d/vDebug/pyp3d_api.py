@@ -16,7 +16,9 @@ from math import *
 # |                                         PLACE                                          |
 # ------------------------------------------------------------------------------------------
 
-
+Tempfilter = ['replace','interact','Guid', 'DesignPhase', 'PBCode', 'Duration','DataSource','UserLabel', 'ClassVersion',
+ 'UserDescription','Domain','UpdatedTime','PBServerData','GraphicsDisplayType','Placement','BaseTransform','BaseProperty','ExtendProperty','SecondaryDevelopmentProperty',
+ 'ParaCmptProperty','GraphicsDisplay']
 class TwoPointPlace:
     def linearize(data,  paramStr):
         data['LinearComponentLengthKey'] = paramStr
@@ -52,76 +54,6 @@ class CombineLinePlace:
         data['CombineLinePlaceComponentKey'] = paramStr
         data[PARACMPT_KEYWORD_INTERACT] = Attr(UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_INTERACT_COMBINELINEPLACE),  member=True)
-# class CombineLinePlace:
-#     def CombineLinePlaceFunction(data,  paramStr1,paramStr2):
-#         data['CombineLinePlaceComponentKey1'] = paramStr1
-#         data['CombineLinePlaceComponentKey2'] = paramStr2
-#         data[PARACMPT_KEYWORD_INTERACT]=Attr(UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_INTERACT_COMBINELINEPLACE),  member=True)
-    # @property
-    # def replaceMethod(self):
-    #     return self._data['replace'].value
-    # @replaceMethod.setter
-    # def replaceMethod(self,  value):
-    #     if isinstance(value,  FunctionType):
-    #         self['replace'] = _Property('')
-    #         self['replace'].value = _Operator()
-    #         self['replace'].value._methodName = value.__name__
-    #         self['replace'].value._filePath = __import__(
-    #             value.__module__).__file__
-    #         self['replace'].value._this = self
-    # @property
-    # def dynamicMethod(self):
-    #     return self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC']
-    # @dynamicMethod.setter
-    # def dynamicMethod(self,  value):
-    #     if isinstance(value,  FunctionType):
-    #         self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC'] = _Property('')
-    #         self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC'].value = _Operator()
-    #         self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC'].value._methodName = value.__name__
-    #         self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC'].value._filePath = __import__(
-    #             value.__module__).__file__
-    #         self._data['\tPLACE_TOOL_OPERATOR_DYNAMIC'].value._this = self
-    # @property
-    # def placeMethod(self):
-    #     return self._data['\tPLACE_TOOL_OPERATOR_PLACE'].value
-    # @placeMethod.setter
-    # def placeMethod(self,  value):
-    #     if isinstance(value,  FunctionType):
-    #         self._data['\tPLACE_TOOL_OPERATOR_PLACE'] = _Property('')
-    #         self._data['\tPLACE_TOOL_OPERATOR_PLACE'].value = _Operator()
-    #         self._data['\tPLACE_TOOL_OPERATOR_PLACE'].value._methodName = value.__name__
-    #         self._data['\tPLACE_TOOL_OPERATOR_PLACE'].value._filePath = __import__(
-    #             value.__module__).__file__
-    #         self._data['\tPLACE_TOOL_OPERATOR_PLACE'].value._this = self
-    # @property
-    # def SuspendplaceMethod(self):
-    #     return self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'].value
-    # @SuspendplaceMethod.setter
-    # def SuspendplaceMethod(self,  value):
-    #     if isinstance(value,  FunctionType):
-    #         self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'] = _Property('')
-    #         self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'].value = _Operator()
-    #         self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'].value._methodName = value.__name__
-    #         self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'].value._filePath = __import__(
-    #             value.__module__).__file__
-    #         self._data['\tPLACE_TOOL_OPERATOR_SUSPENDPLACE'].value._this = self
-    # @property
-    # def LinearComponentLengthKey(self):
-    #     if '\tLinearComponentLength' in self._data:
-    #         return self._data['\tLinearComponentLength'].value
-    # @LinearComponentLengthKey.setter
-    # def LinearComponentLengthKey(self,  value):
-    #     self._data['\tLinearComponentLength'] = _Property('')
-    #     self._data['\tLinearComponentLength'].value = value
-    # @property
-    # def MultiPointKey(self):
-    #     if '\tMultiPointKey' in self._data:
-    #         return self._data['\tMultiPointKey'].value
-    # @MultiPointKey.setter
-    # def MultiPointKey(self,  value):
-    #     self._data['\tMultiPointKey'] = _Property('')
-    #     self._data['\tMultiPointKey'].value = value
-
 
 def place(noumenon: Noumenon):  # 通过布置工具放置组件
     if get_global_variable('is_script_to_josn'):
@@ -135,10 +67,16 @@ def place(noumenon: Noumenon):  # 通过布置工具放置组件
 
 
 def entityid_isvaid(entityid: P3DEntityId):
-    if entityid._ModelId <= -2 or entityid._ElementId < 0:
-        return False
-    else:
-        return True
+    if entityid._ModelId <= -2 or entityid._ElementId < 0:return False
+    return True
+def entityid_isequal(entityid1: P3DEntityId,entityid2: P3DEntityId):
+    if entityid1._ModelId == entityid2._ModelId and entityid1._ElementId == entityid2._ElementId:return True 
+    return False
+  
+def Transparent(eneityId: P3DEntityId,judge:bool):  
+    if not isinstance(eneityId, P3DEntityId):
+        raise TypeError('input parameter error,  please input "P3DEntityId"!')
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_TRANSPARENT)(eneityId,judge)     
 
 
 def place_to(noumenon: Noumenon, transform: GeTransform = GeTransform()):  # 在特定位置布置几何体
@@ -185,12 +123,17 @@ def create_preview(noumenon: Noumenon):
 
 def launch_tool(path: str):
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_LAUNCH_TOOL)(path)
-
-
+def launch_Marquee_tool(path: str):
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_LAUNCH_MARQUEE_TOOL)(path)
 def show_Input_Dlg(isshow: bool):
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                     PARACMPT_SHOW_INPUT_DLG)(isshow)
 
+def python_transformation_operation(entityid1: P3DEntityId,transform: GeTransform):
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_PYTHON_TRANSFORMATION_OPERATION)(entityid1,transform)
+
+def python_Copy_operation(entityid1: P3DEntityId,transform: GeTransform):
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_PYTHON_COPY_OPERATION)(entityid1,transform)
 
 def pack_bfa(noumenon: Noumenon, previewFile: str = None):
     if get_global_variable('is_script_to_josn'):
@@ -247,6 +190,13 @@ def replace_noumenon_python(temp: dict, instancekey: P3DInstanceKey):
             'input parameter error,  please input "P3DInstanceKey"!')
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                     PARACMPT_REPLACE_NOUMENON_PYTHON)(temp, instancekey)
+
+def replace_noumenon_python_new(temp: dict, instancekey: P3DInstanceKey):
+    if not isinstance(instancekey,  P3DInstanceKey):
+        raise TypeError(
+            'input parameter error,  please input "P3DInstanceKey"!')
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
+                    PARACMPT_REPLACE_NOUMENON_PYTHON_NEW)(temp, instancekey)
 # ------------------------------------------------------------------------------------------
 # |                                        ENTITY                                          |
 # ------------------------------------------------------------------------------------------
@@ -438,7 +388,21 @@ def get_datakey_from_entity(entityid: P3DEntityId) -> P3DInstanceKey:
 
 # 根据instancekey返回noumenon
 
+def get_noumenon_on_entityid(entityid: P3DEntityId) -> Noumenon:
+    datakey = get_datakey_from_entity(entityid)
+    noumenon= get_noumenon_from_datakey(datakey)
+    return noumenon
 
+def get_active_modelId() -> P3DModelId:
+    
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_ACTIVE_MODELID)()
+def get_entityid_by_modelid(modelid: P3DModelId) -> P3DEntityId:
+    
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_ENTITYID_BY_MODELID)(modelid)
+
+def get_entityid_by_activemodel():
+    a = get_active_modelId()
+    return get_entityid_by_modelid(a)
 def get_noumenon_from_datakey(instancekey: P3DInstanceKey) -> Noumenon:
     '''
     get noumenon from instancekey
@@ -447,7 +411,23 @@ def get_noumenon_from_datakey(instancekey: P3DInstanceKey) -> Noumenon:
         raise TypeError(
             'input parameter error,  please input "P3DInstanceKey"!')
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_NOUMENON_FROM_INSTANCEKEY)(instancekey)
+def get_extended_property_json(instancekey: P3DInstanceKey):
+    '''
+    get noumenon from instancekey
+    '''
+    if not isinstance(instancekey, P3DInstanceKey):
+        raise TypeError(
+            'input parameter error,  please input "P3DInstanceKey"!')
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_EXTENDED_PROPERTY_JSON)(instancekey)
 
+def update_extended_property_json(json:str,instancekey: P3DInstanceKey):
+    '''
+    get noumenon from instancekey
+    '''
+    if not isinstance(instancekey, P3DInstanceKey):
+        raise TypeError(
+            'input parameter error,  please input "P3DInstanceKey"!')
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_UPDATE_EXTENDED_PROPERTY_JSON)(json,instancekey)
 # 返回当前的工程中AssociateModel_modelid中对应的entityid, ModelInfo_modelid中对应的entityid
 
 
@@ -511,7 +491,13 @@ def get_tempcontext():
 
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_GET_TEMPCONTEXT)()
 
+def get_Entity_Area(entityid: P3DEntityId):
 
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_GET_ENTITY_AREA)(entityid)
+
+def get_Entity_Volume(entityid: P3DEntityId):
+
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_GET_ENTITY_VOLUME)(entityid)
 def bbb():
 
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  BBB)()

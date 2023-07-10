@@ -89,7 +89,7 @@ def gen_code_enrol_set_get(arg: list) -> str:
             enrolFunction += setFunIter
             enrolFunction += getFunIter
             enrolName += enrolFunIter  # set
-            enrolFunIter = enrolFunIter.replace('set', 'get')
+            enrolFunIter = enrolFunIter.replace('set', 'get')#copy
             enrolName += enrolFunIter  # get
     enrolName += '\treturn 0;\n}();\n'
     return enrolFunction+enrolName

@@ -51,6 +51,3 @@ class Plane():  # 几何概念-平面
         return mat
 
 
-segm = Segment()
-a = 1
-b=1

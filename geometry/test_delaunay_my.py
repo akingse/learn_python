@@ -4,7 +4,7 @@ import os
 import random
 import numpy as np
 mypath = 'D:\Alluser\learn_python'  # include pyp3d
-sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../'))
 from pyp3d import *  # NOQA: E402
 from random import *  # NOQA: E402
 # 集合
@@ -28,6 +28,8 @@ p1 = Point(1, 2, 3)
 # d = np.linalg.det(a)
 # print(d)
 
+def _get_point()->list:
+    return [randint(-100, 100),randint(-100, 100)]
 
 def _get_rand_point(is2D=True) -> GeVec3d:
     rg = 100
@@ -145,6 +147,24 @@ def _get_circumcircle_center(trigon: list) -> GeVec3d:
     return pointC
     # return trans(pointC)*scale(norm(pointC-trigon[0]))
 
+def _get_circumcircle_center2(trigon: list) -> list:
+    # _inverse_2x2
+    x1,y1 = trigon[0][0],trigon[0][1]
+    x2,y2 = trigon[1][0],trigon[1][1]
+    x3,y3 = trigon[2][0],trigon[2][1]
+    m1 = 2*(x2-x1)
+    n1 = 2*(y2-y1)
+    k1 = x2*x2-x1*x1+y2*y2-y1*y1
+    m2 = 2*(x3-x1)
+    n2 = 2*(y3-y1)
+    k2 = x3*x3-x1*x1+y3*y3-y1*y1
+    k = (m1*n2-n1*m2)
+    if (k == 0):  # is_float_zero(k)
+        return []
+    return [(n2*k1-n1*k2)/k, (-m2*k1+m1*k2)/k]
+
+
+
 
 RP = _get_rand_point
 GP = _gen_rand_point
@@ -172,15 +192,17 @@ if __name__ == '__main__':
 
     tStart = time.time()
     print(time.asctime(time.localtime(tStart)))
-    for i in range(int(1e5)):
+    for i in range(int(1e6)):
         # spent time: 2.179699659347534
         # res = _is_point_in_triangle(RP(), [RP(), RP(), RP()])
         # res = _is_point_in_triangle1(RP(), [RP(), RP(), RP()])
         # res = _is_point_in_triangle1(GP(), [GP(), GP(), GP()])
 
-        res = _get_circumcircle_center([RP(), RP(), RP()])
+        # res = _get_circumcircle_center([RP(), RP(), RP()])
+        res = _get_circumcircle_center2([_get_point(), _get_point(), _get_point()])
         # res = _get_circumcircle_center1([RP(), RP(), RP()])
         # res = _is_point_in_circumcircle([RP(), RP(), RP()])
         pass
     print(time.time()-tStart)
     # create_geometry(scale(100)*Arc())
+    a=1

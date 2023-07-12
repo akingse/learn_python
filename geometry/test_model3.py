@@ -69,14 +69,14 @@ p3 = Vec3(80, 100)
 trigon = mat*[p2, p1, p3, ]
 
 
-# create_geometry(Section(trigon))
+create_geometry(Section(trigon))
 # 测试包围圆
 # p, r = getTriangleBoundingCircle(trigon)
 # create_geometry(trans(p)*scale(r)*Arc())
 # create_geometry(trans(p)*scale(r)*Sphere())
 
 # 测试点在三角形内
-# isPointInTriangle=isPointInTriangle2D
+isPointInTriangle=isPointInTriangle2D
 # print(isPointInTriangle(mat*Vec3(0, 0), trigon))  # out
 # print(isPointInTriangle(mat*Vec3(30, 80), trigon))  # out
 # print(isPointInTriangle(mat*Vec3(80, 120), trigon))  # out
@@ -166,14 +166,6 @@ triB_0 = Vec3(4948648.64640146,-378096.898933644,39.9822462529783)
 triB_1 = Vec3(4948590.11470598,-378087.628423812,39.9821558816473)
 triB_2 = Vec3(4948588.64640146,-378096.898933644,39.9821536146255)
 
-# triA_0 = Vec3(1,1)
-# triA_1 = Vec3(-2,1-0.0001)
-# triA_2 = Vec3(1,-1)
-# triB_0 = Vec3(0,0)
-# triB_1 = Vec3(4,0)
-# triB_2 = Vec3(2,1)
-
-
 # triA_0 = Vec3(4934991.08492488,-380736.849323458,-266.330042529162)
 # triA_1 = Vec3(4934984.36869635,-380736.849323732,-263.095677331456)
 # triA_2 = Vec3(4934986.01043158,-380736.849323665,-271.249229247876)
@@ -198,8 +190,8 @@ triB_2 = Vec3(4935011.8121505287, -380736.84932261088, -200.00000000000006)
 
 triA=[triA_0,triA_1,triA_2]
 triB=[triB_0,triB_1,triB_2]
-create_geometry(Section(triA).colorRed())
-create_geometry(Section(triB).colorGreen())
+# create_geometry(Section(triA).colorRed())
+# create_geometry(Section(triB).colorGreen())
 # p=Vec3(200.00000000000000, -173.20508075688772, 0.0000000000000000)
 # create_geometry(trans(p)*Sphere())
 
@@ -209,9 +201,47 @@ create_geometry(Section(triB).colorGreen())
 
 # res=is_two_triangles_bounding_box_intersect([triA_0,triA_1,triA_2],[triB_0,triB_1,triB_2],0.001)
 res=isTwoTrianglesIntersectionSAT(triA,triB)
-print(res)
+# print(res)
 res=isSegmentAndTriangleIntersctSAT([triA_0,triA_1],triB)
+# print(res)
+
+def isPointContainedInTriangle(point, triangle):
+    v0=triangle[0]
+    v1=triangle[1]
+    v2=triangle[2]
+    edge1 = v1 - v0
+    edge2 = v2 - v0
+    ptVec = point - v0
+    normal = edge1.cross(edge2)
+    normal.normalized()
+    dot1 = normal.dot(edge1.cross(ptVec))
+    dot2 = normal.dot(ptVec.cross(edge2))
+    # is perpendi
+    dotP=normal.dot(ptVec) #-1.0097419586828951e-28
+
+
+    return (dot1 >= 0.0 and dot2 >= 0.0 and dot1 + dot2 <= normal.dot(normal))
+
+
+
+triA_0 = Vec3(-2,1)
+triA_1 = Vec3(1,-1)
+triA_2 = Vec3(1,1)
+# triB_0 = Vec3(0,0)
+# triB_1 = Vec3(4,0)
+# triB_2 = Vec3(2,1)
+triA=scale(10)*[triA_0,triA_1,triA_2]
+# create_geometry(Section(triA).colorBlue())
+# show_points_line()
+theta=pi/2
+sk=scale(1e6)
+res=isPointContainedInTriangle(roty(theta)*sk*Vec3(11.2,0.2),roty(theta)*sk*triA)
 print(res)
+print(math.inf)
+
+sw=scale(10)*Sweep(Section(Vec3(0,0),Vec3(2,0),Vec3(2,1),Vec3(1,1),Vec3(1,2),Vec3(0,2)),Line(Vec3(0,0),Vec3(0,0,1)))
+# create_geometry(scale(10)*Line(Vec3(2,1,1),Vec3(1,1),Vec3(1,2,1)))
+# create_geometry(sw)
 
 # d=4.6566128730773926e-10
 # count_pre_clash=count_clash_hard+count_clash_soft
@@ -230,3 +260,7 @@ count_edgeCrossTri = 0
 count_pointInTri = 127080000  # 由于return true会提前中止函数，所有这个数字比count_across小
 count_segCrossTri = 0
 count_across = 177680000
+is_point_in_polygon
+
+create_geometry(scale(10)*Cube())
+create_geometry(trans(1,1,1)*scale(3)*Cube())

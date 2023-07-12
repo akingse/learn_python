@@ -126,12 +126,13 @@ class _Core(threading.Thread):
         self.setDaemon(daemon)
         self.start()
     def run(self):
-        while True:
-            self._port.send(self._deal_return(BufferStack(self._port.recv())).data)
-            if not self._error is None:
-                self._port = None
-                self._calling = 3
-                return
+        if self._port.withExe:
+            while True:
+                self._port.send(self._deal_return(BufferStack(self._port.recv())).data)
+                if not self._error is None:
+                    self._port = None
+                    self._calling = 3
+                    return
     def __del__(self):
         self.join()
     def __call__(self, mode, func, *args):
@@ -140,8 +141,12 @@ class _Core(threading.Thread):
         self._buffer.push(list(args), func, mode)
         if self._calling == 0: # 外部调用
             self._calling = 1
+            timeWait=0
             while self._calling!=3:
                 time.sleep(0.1)
+                if timeWait==5: #2s
+                    break
+                timeWait+=1
             if not self._error is None:
                 raise self._error
             self._calling = 0

@@ -61,24 +61,33 @@ def isPointInTriangle2D(point, trigon) -> bool:  # 2D
     p0 = trigon[0]
     p1 = trigon[1]
     p2 = trigon[2]
-    ccw = (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * \
-        (p1.y - p0.y) > 0  # ccw Triangle
-    if ccw:
-        if ((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < _eps):
-            return false
-        if ((p2.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p2.y - p0.y) > eps):
-            return false
-        if ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) < _eps):
-            return false
-        return true
+    # ccw = (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * \
+    #     (p1.y - p0.y) > 0  # ccw Triangle
+    # if ccw:
+    #     if ((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < _eps):
+    #         return false
+    #     if ((p2.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p2.y - p0.y) > eps):
+    #         return false
+    #     if ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) < _eps):
+    #         return false
+    #     return true
+    # else:
+    #     if ((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > eps):
+    #         return false
+    #     if ((p2.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p2.y - p0.y) < _eps):
+    #         return false
+    #     if ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > eps):
+    #         return false
+    #     return true
+    if (0.0 < (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)):
+        return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < 0.0) or  # bool isLeftA
+                ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) < 0.0) or # bool isLeftB
+                ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) < 0.0))  # bool isLeftC
     else:
-        if ((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > eps):
-            return false
-        if ((p2.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p2.y - p0.y) < _eps):
-            return false
-        if ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > eps):
-            return false
-        return true
+        return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > 0.0) or  # bool isLeftA
+                ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > 0.0) or # bool isLeftB
+                ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) > 0.0))  # bool isLeftC
+
 
 
 def isPointInTriangle(point: GeVec3d, trigon: list) -> bool:  # must coplanar
@@ -219,19 +228,21 @@ def isTwoTrianglesIntersectionSAT(triA, triB) -> bool:
         minB = min(min(dotB0, dotB1), dotB2)
         maxB = max(max(dotB0, dotB1), dotB2)
         if maxA < minB or maxB < minA:
-        # if maxA + eps < minB or maxB + eps < minA:
+            # if maxA + eps < minB or maxB + eps < minA:
             return False
     return True
 
+
 def isSegmentAndTriangleIntersctSAT(segment, trigon):
-    vecZ=(trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
-    if (abs(vecZ.dot(segment[0] - trigon[0]))<eps and abs(vecZ.dot(segment[1] - trigon[0]))<eps): # the coplanar
+    vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
+    if (abs(vecZ.dot(segment[0] - trigon[0])) < eps and abs(vecZ.dot(segment[1] - trigon[0])) < eps):  # the coplanar
         axes = [vecZ.cross(segment[1] - segment[0]),
                 vecZ.cross(trigon[1] - trigon[0]),
                 vecZ.cross(trigon[2] - trigon[1]),
-                vecZ.cross(trigon[0] - trigon[2]) ]
+                vecZ.cross(trigon[0] - trigon[2])]
     else:
-        edges = [trigon[1] - trigon[0], trigon[2] - trigon[1], trigon[0] - trigon[2]]
+        edges = [trigon[1] - trigon[0], trigon[2] -
+                 trigon[1], trigon[0] - trigon[2]]
         vecSeg = segment[1] - segment[0]
         axes = [edges[0],
                 edges[1],
@@ -239,7 +250,7 @@ def isSegmentAndTriangleIntersctSAT(segment, trigon):
                 vecSeg,
                 vecSeg.cross(edges[0]),
                 vecSeg.cross(edges[1]),
-                vecSeg.cross(edges[2]) ]
+                vecSeg.cross(edges[2])]
     for axis in axes:
         dotA0 = trigon[0].dot(axis)
         dotA1 = trigon[1].dot(axis)
@@ -253,7 +264,6 @@ def isSegmentAndTriangleIntersctSAT(segment, trigon):
         if maxA < minB or maxB < minA:
             return False
     return True
-
 
 
 def isTriangleBoundingBoxIntersect(trigon: list, box: list) -> bool:
@@ -375,6 +385,38 @@ def is_straddling_test(segm, edge) -> bool:
             (edge[1]-edge[0]).cross(segm[1]-edge[0])) < _eps:
         return false
     return true
+    # return not((edge[0]-segm[0]).cross(segm[1]-segm[0]).dot((segm[1]-segm[0]).cross(edge[1]-segm[0])) < _eps or
+    #            (segm[0]-edge[0]).cross(edge[1]-edge[0]).dot((edge[1]-edge[0]).cross(segm[1]-edge[0])) < _eps)
 
-    return not((edge[0]-segm[0]).cross(segm[1]-segm[0]).dot((segm[1]-segm[0]).cross(edge[1]-segm[0])) < _eps or
-               (segm[0]-edge[0]).cross(edge[1]-edge[0]).dot((edge[1]-edge[0]).cross(segm[1]-edge[0])) < _eps)
+
+def isPointRayAcrossTriangle(point, trigon):
+    if (point.z > max(trigon[0].z, trigon[1].z, trigon[2].z) or
+        point.x > max(trigon[0].x, trigon[1].x, trigon[2].x) or
+        point.x < min(trigon[0].x, trigon[1].x, trigon[2].x) or
+        point.y > max(trigon[0].y, trigon[1].y, trigon[2].y) or
+            point.y < min(trigon[0].y, trigon[1].y, trigon[2].y)):
+        return False
+    inf = 3.402823466e+38
+    ray = GeVec3d(point.x, point.y, inf)
+    axisZ = GeVec3d(0, 0, 1)
+    edges = [trigon[1] - trigon[0],
+             trigon[2] - trigon[1],
+             trigon[0] - trigon[2]]
+    axes = [axisZ.cross(edges[0]),
+            axisZ.cross(edges[1]),
+            axisZ.cross(edges[2]),
+            axisZ,
+            edges[0],
+            edges[1],
+            edges[2]]
+    for axis in axes:
+        dotA0 = axis.dot(trigon[0])
+        dotA1 = axis.dot(trigon[1])
+        dotA2 = axis.dot(trigon[2])
+        minTri = min(min(dotA0, dotA1), dotA2)
+        maxTri = max(max(dotA0, dotA1), dotA2)
+        minRay = min(axis.dot(point), axis.dot(ray))
+        maxRay = max(axis.dot(point), axis.dot(ray))
+        if maxTri < minRay or maxRay < minTri:
+            return False
+    return True

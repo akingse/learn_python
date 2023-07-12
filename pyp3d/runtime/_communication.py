@@ -49,13 +49,17 @@ class Port:
     def __init__(self, name, deal):
         self._portname = name
         self._deal = deal
+        self.withExe=True
         if len(sys.argv) > 1:
             self._pid = sys.argv[1]
         else:
             while True:
                 pids = _c_i.find_porcess(_EXE_NAME)
                 if len(pids) == 0: 
-                    raise RuntimeError('{0} not found. Please start {0}.'.format(_EXE_NAME))
+                    # raise RuntimeError('{0} not found. Please start {0}.'.format(_EXE_NAME))
+                    print('bimbase not found!')
+                    self.withExe=False
+                    break
                 elif len(pids) == 1: 
                     self._pid = pids[0]
                     break
@@ -64,10 +68,11 @@ class Port:
                     self._pid = foreground_pid
                     break
                 time.sleep(1)
-        self._kaishaku = Kaishaku(self._pid)
-        self._kaishaku.setDaemon(True)
-        self._kaishaku.start()
-        self._connect()
+        if self.withExe:
+            self._kaishaku = Kaishaku(self._pid)
+            self._kaishaku.setDaemon(True)
+            self._kaishaku.start()
+            self._connect()
     def _connect(self):
         while True:
             try:
@@ -75,10 +80,11 @@ class Port:
                 break
             except RuntimeError: time.sleep(1)
     def recv(self):
-        while True:
-            content = self._pipe.recv()
-            if content != None: return content
-            self._connect()
+        if self.withExe:
+            while True:
+                content = self._pipe.recv()
+                if content != None: return content
+                self._connect()
     def send(self, buffer):
         while True:
             if self._pipe.send(buffer): break

@@ -1263,20 +1263,21 @@ class Polyface(Primitives):  # 三角面片
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_POLYFACE_TO_GRAPHICS)
         vertexListO = []
         faceListO = []
-        with open(filePath) as file:
-            line = file.readline()
-            while line:
-                line = line.replace('\n', '')
-                strs = line.split(" ")
-                if strs[0] == "v":
-                    vertexListO.append(
-                        GeVec3d(10000*float(strs[1]), 10000*float(strs[2]), 10000*float(strs[3])))
-                if strs[0] == "f":
-                    for i in range(1, len(strs)):
-                        faces = strs[i].split("/")
-                        faceListO.append(int(faces[0]))
-                    faceListO.append(int(0))
+        if (filePath!=''):
+            with open(filePath) as file:
                 line = file.readline()
+                while line:
+                    line = line.replace('\n', '')
+                    strs = line.split(" ")
+                    if strs[0] == "v":
+                        vertexListO.append(
+                            GeVec3d(10000*float(strs[1]), 10000*float(strs[2]), 10000*float(strs[3])))
+                    if strs[0] == "f":
+                        for i in range(1, len(strs)):
+                            faces = strs[i].split("/")
+                            faceListO.append(int(faces[0]))
+                        faceListO.append(int(0))
+                    line = file.readline()
         self.vertexList = vertexListO
         self.faceList = faceListO
 

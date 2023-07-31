@@ -1,10 +1,9 @@
-import numpy as np
-from math import *
 import sys
 import os
 mypath = r'D:\Alluser\learn_python'  # fixed path
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
+from random import *  # NOQA: E402
 
 
 def isTwoTrianglesIntersection2D(triA, triB):
@@ -33,10 +32,14 @@ def isTwoTrianglesIntersection2D(triA, triB):
 triA = [Vec3(0, 0), Vec3(100, 0), Vec3(50, 100)]
 triB = roty(pi/6)*trans(0, 100)*triA
 triA = rotz(pi/6)*trans(200, 0, 100)*triA
-create_geometry(Section(triA).colorBlue())
-create_geometry(Section(triB).colorGreen())
+# create_geometry(Section(triA).colorBlue())
+# create_geometry(Section(triB).colorGreen())
 isTwoTrianglesIntersectionSAT(triA, triB)
-
 isTwoTrianglesIntersection2D(triA, triB)
 
-# 分离轴定理，可视化
+triA=[get_rand_point(False),get_rand_point(False),get_rand_point(False)]
+triB=[get_rand_point(False),get_rand_point(False),get_rand_point(False)]
+if (isTwoTrianglesIntersectionSAT(triA,triB)):
+    create_geometry(Section(triA).colorBlue())
+    create_geometry(Section(triB).colorGreen())
+    print('intersect')

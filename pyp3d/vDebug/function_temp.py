@@ -79,15 +79,20 @@ def isPointInTriangle2D(point, trigon) -> bool:  # 2D
     #     if ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > eps):
     #         return false
     #     return true
-    if (0.0 < (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)):
-        return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < 0.0) or  # bool isLeftA
-                ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) < 0.0) or # bool isLeftB
-                ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) < 0.0))  # bool isLeftC
-    else:
-        return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > 0.0) or  # bool isLeftA
-                ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > 0.0) or # bool isLeftB
-                ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) > 0.0))  # bool isLeftC
 
+    # if (0.0 < (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)):
+    #     return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) < 0.0) or  # bool isLeftA
+    #             ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) < 0.0) or # bool isLeftB
+    #             ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) < 0.0))  # bool isLeftC
+    # else:
+    #     return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > 0.0) or  # bool isLeftA
+    #             ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > 0.0) or # bool isLeftB
+    #             ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) > 0.0))  # bool isLeftC
+
+    axisz=(p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)
+    return  (0.0<=axisz*((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y))) and \
+            (0.0<=axisz*((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y))) and \
+            (0.0<=axisz*((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y))) 
 
 
 def isPointInTriangle(point: GeVec3d, trigon: list) -> bool:  # must coplanar
@@ -177,7 +182,7 @@ def is_segment_cross_triangle_surface(segment, trigon):
 def isTwoTrianglesIntersectionSAT(triA, triB) -> bool:
     edgesA = [triA[1] - triA[0], triA[2] - triA[1], triA[0] - triA[2]]
     edgesB = [triB[1] - triB[0], triB[2] - triB[1], triB[0] - triB[2]]
-    isNorm = False
+    isNorm = False #unitize every edge
     if isNorm:
         axes = [(edgesA[0].cross(edgesB[0])).normalized(),
                 (edgesA[0].cross(edgesB[1])).normalized(),
@@ -201,6 +206,9 @@ def isTwoTrianglesIntersectionSAT(triA, triB) -> bool:
                 edgesB[0],
                 edgesB[1],
                 edgesB[2],
+                # edgesA[0].cross(edgesA[1]),
+                # edgesB[0].cross(edgesB[1]),
+                # crossAB
                 edgesA[0].cross(edgesB[0]),
                 edgesA[0].cross(edgesB[1]),
                 edgesA[0].cross(edgesB[2]),
@@ -420,3 +428,25 @@ def isPointRayAcrossTriangle(point, trigon):
         if maxTri < minRay or maxRay < minTri:
             return False
     return True
+
+
+def Polyhedron4():
+    polyface=Polyface('')
+    polyface.vertexList=[Vec3(0, 0,0),Vec3(1, 0,0),Vec3(0.5, 1,0),Vec3(0.5,0.5, 1)]
+    polyface.faceList=[int(1),int(2),int(3),int(0),
+                       int(1),int(2),int(4),int(0),
+                       int(2),int(3),int(4),int(0),
+                       int(3),int(1),int(4),int(0)]
+    return polyface
+
+
+def Polyhedron5():
+    polyface=Polyface('')
+    polyface.vertexList=[Vec3(0, 0,0),Vec3(1, 0,0),Vec3(1,1,0),Vec3(0,1, 0),Vec3(0.5,0.5, 1)]
+    polyface.faceList=[int(1),int(2),int(3),int(4),int(0),
+                       int(1),int(2),int(5),int(0),
+                       int(2),int(3),int(5),int(0),
+                       int(3),int(4),int(5),int(0),
+                       int(4),int(1),int(5),int(0) ]
+    return polyface
+

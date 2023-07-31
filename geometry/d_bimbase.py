@@ -24,19 +24,23 @@ for clashresult in tree.getroot().find('batchtest').find('clashtests').find('cla
     #           float(pos.get('z')))) * scale(size) * Cube()
     # cube.color(1, 0, 0, 0.3)
     # geo.append(cube)
-    segment = [GeVec3d(float(pos.get('xS')), float(pos.get('yS')), float(pos.get('zS'))),
-               GeVec3d(float(pos.get('xE')), float(pos.get('yE')), float(pos.get('zE')))]
+    # segment = [GeVec3d(float(pos.get('xS')), float(pos.get('yS')), float(pos.get('zS'))),
+    #            GeVec3d(float(pos.get('xE')), float(pos.get('yE')), float(pos.get('zE')))]
     # create_geometry(geo)
-    if len(segment) == 2:
-        # print(segment[0])
-        # print(segment[1])
-        d = norm(segment[1]-segment[0])
-        if (d > PL_A):
-            print('d =', d)
-        # show_points_line(segment)
-        # create_geometry(trans(segment[0])*scale(0.1)*Cube().colorCyan(0.1))
-    else:
-        print('NotOverlap')
+    pointS=pos.get('pointS').split(',')
+    pointE=pos.get('pointE').split(',')
+    pointS=Vec3(float(pointS[0]),float(pointS[1]),float(pointS[2]))
+    pointE=Vec3(float(pointE[0]),float(pointE[1]),float(pointE[2]))
+
+
+    d = norm(pointS-pointE)
+    if (d > PL_A):
+        print('d =', d)
+    # show_points_line(segment)
+    # create_geometry(trans(pointS)*scale(0.1)*Cube().colorCyan(0.1))
+    geo.append(trans(pointS)*scale(50)*Cube().colorCyan(0.1))
+create_geometry(geo)
+
 
 # create_geometry(Sphere(GeVec3d(3.1415926535897931, 0.38330090700000002, 10.000000000000000)))
 # create_geometry(Sphere(GeVec3d(3.1415926535897931, 0.38330090700000008, 3.1415926535897931)))

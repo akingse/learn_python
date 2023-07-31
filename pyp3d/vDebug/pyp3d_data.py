@@ -497,13 +497,13 @@ class GeVec3d(BufferStackBase):
             return GeVec3d(0, 0, 0)
         else:
             return GeVec3d(self.x/n, self.y/n, self.z/n)
-    def normalized(self): #normalized self
+    def normalize(self): #normalized self
         n = self.norm()
         if n > PL_A:
             self.x=self.x/n
             self.y=self.y/n
             self.z=self.z/n
-    def normalize(self): # new normalize
+    def normalized(self): # new normalize
         return self.unitize()
     def isOrigin(self):
         return self.norm() < PL_A

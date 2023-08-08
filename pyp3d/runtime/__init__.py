@@ -144,7 +144,7 @@ class _Core(threading.Thread):
             timeWait=0
             while self._calling!=3:
                 time.sleep(0.1)
-                if timeWait==5: #2s
+                if timeWait==10: #2s
                     break
                 timeWait+=1
             if not self._error is None:

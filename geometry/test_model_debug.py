@@ -3,7 +3,7 @@ import os
 mypath = r'D:\Alluser\learn_python'  # fixed path
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
-
+DBL_EPSILON=2.2204460492503131e-016
 
 # 测试三角形与包围盒相交
 # res=isTriangleBoundingBoxIntersect(trigon, [Vec3(100,100,100),Vec3(700,600,500)])
@@ -108,10 +108,10 @@ if (vectZ.dot(segmA[0]) < vectZ.dot(segmB[0])):
     d_P2L = -d_P2L
 segmB_move = [ segmB[0] + d_P2L * vectZ, segmB[1] + d_P2L * vectZ ]
 
-show_points_line(segmA)
-show_points_line(segmB)
-show_points_line(segmB_move)
-show_points_line(lineP_AB)
+# show_points_line(segmA)
+# show_points_line(segmB)
+# show_points_line(segmB_move)
+# show_points_line(lineP_AB)
 # create_geometry(Section(triA).colorRed())
 # create_geometry(Section(triB).colorGreen())
 # p=Vec3(200.00000000000000, -173.20508075688772, 0.0000000000000000)
@@ -122,8 +122,141 @@ show_points_line(lineP_AB)
 # create_geometry(Section(triB0,triB1,triB2))
 
 # res=is_two_triangles_bounding_box_intersect([triA_0,triA_1,triA_2],[triB_0,triB_1,triB_2],0.001)
-res = isTwoTrianglesIntersectionSAT(triA, triB)
+res = isTwoTrianglesIntersectSAT(triA, triB)
 # print(res)
 res = isSegmentAndTriangleIntersctSAT([triA_0, triA_1], triB)
 # print(res)
+
+triA_0 = Vec3(50,-72,0)
+triA_2 = Vec3(37,21,0)
+triA_1 = Vec3(0,87,0)
+triB_0 = Vec3(-2,-65,0)
+triB_1 = Vec3(88,16,0)
+triB_2 = Vec3(24,67,0)
+
+triA_0 = Vec3(0, 0, 0)
+triA_1 = Vec3(10, 5, 0)
+triA_2 = Vec3(0, 10, 0)
+triB_0 = Vec3(3, 0, 0)
+triB_1 = Vec3(3, 10, 0)
+triB_2 = Vec3(-2, 5, 0)
+
+triA_0 = Vec3(83.0, -88.0, 53.0)
+triA_1 = Vec3(37.0, 78.0, 93.0)
+triA_2 = Vec3(-93.0, -83.0, -4.0)
+triB_0 = Vec3(-15.0, -4.0, 95.0)
+triB_1 = Vec3(79.0, 77.0, 56.0)
+triB_2 = Vec3(1.0, -49.0, -12.0)
+
+triA_0 = Vec3(4934979.7209219905, -380736.84932392224, -192.73244736959688)
+triA_1 = Vec3(4934971.8121505287, -380736.84932424547, -199.99999999981586)
+triA_2 = Vec3(4934973.5629212800, -380736.84932417388, -191.19828105541882)
+triB_0 = Vec3(4935011.8121505287, -380736.84932261088, -200.00000000000006)
+triB_1 = Vec3(4934982.7913352484, -380736.84932379692, -187.97918471982877)
+triB_2 = Vec3(4934979.1061984757, -380736.84932394756, -193.49438164979355)
+
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+# res=isPointInTriangle(g_axisNaN,triA)
+res=isTwoTrianglesIntersectSAT(triA,triB)
+# create_geometry(Section(triA).colorBlue())
+# create_geometry(Section(triB).colorGreen())
+
+# pnts=getTwoTrianglesIntersectPoints(triA,triB)
+# show_points_line(pnts)
+# res = isPointInTriangle(pnts[0],triA)
+# res = isPointInTriangle(pnts[1],triA)
+# res = isPointInTriangle(pnts[0],triB)
+# res = isPointInTriangle(pnts[1],triB)
+
+
+boxA_0 = Vec3(34.0, 7.0, 0.0)
+boxA_1 = Vec3(125.0, 84.0, 71.0)
+triB_0 = Vec3(73.0, -17.0, 0.0)
+triB_1 = Vec3(63.0, -25.0, 0.0)
+triB_2 = Vec3(8.0, -69.0, 0.0)
+box=[boxA_0, boxA_1]
+triB = [triB_0, triB_1, triB_2]
+# create_bounding_box(box)
+# create_geometry(Section(triB).colorGreen())
+
+# 测试交点的精度
+for i in range(0):
+    # triA_0 = scale(randint(0,100))*Vec3(0, 0, 10)
+    # triA_1 = scale(randint(0,100))*Vec3(10, 5, 0)
+    # triA_2 = scale(randint(0,100))*Vec3(0, 10, 0)
+    triA_0 = scale(random())*Vec3(1, 2, 10)
+    triA_1 = scale(random())*Vec3(10, 5, 1)
+    triA_2 = scale(random())*Vec3(3, 10, 3)
+    triA = [triA_0, triA_1, triA_2]
+    create_geometry(Section(triA).colorBlue())
+    line=scale(random())*[Vec3(-1, -2, -10),Vec3(11, 12, 13)]
+    # line=Line([Vec3(0, 0, -10),Vec3(10, 10, 10)])
+    create_geometry(Line(line))
+    point=getIntersectOfSegmentAndPlaneINF(line,triA)
+    normalA = (triA[1] - triA[0]).cross(triA[2] - triA[0]).normalized()
+    isOn1=(point-triA[0]).dot(normalA) #1.0269562977782698e-15
+    isOnP=(point-triA[0]).normalized().dot(normalA) # 1.457167719820518e-16
+    isOnb=fabs(isOnP)<DBL_EPSILON
+    # show_points_line([point],1)
+    print('return 0')
+
+# 面接触
+triA_0 = Vec3(0, 0, 0)
+triA_1 = Vec3(10, 5, 0)# Vec3(10, 5, 0.000001) #相对值和设置的eps有关
+triA_2 = Vec3(0, 10, 0)
+# triB_0 = Vec3(3, 0, 0)
+# triB_1 = Vec3(3, 10, 0)
+# triB_2 = Vec3(-2, 5, 0)
+triB_0 = Vec3(0, 0, 0)
+triB_1 = Vec3(10, 5, 0)
+triB_2 = Vec3(10, -5, 0)
+
+triA = [triA_0, triA_1, triA_2]
+# triB = trans(5,2.5)*scale(0.6)*[triB_0, triB_1, triB_2]
+triB = trans(2.5,1.25)*scale(0.6)*[triB_0, triB_1, triB_2]
+
+# 线接触
+triA_0 = Vec3(0, 0, 0)
+triA_1 = Vec3(10, 5, 0)
+triA_2 = Vec3(0, 10, 0)
+triB_0 = Vec3(5, 2.5, -10)
+triB_1 = Vec3(5, 2.5, 10) #Vec3(5, 2.5, 1e8)共线判断必须单位化，否则精度的影响是致命的
+triB_2 = Vec3(10, 0, 0)
+# triA = rotate_arbitrary(g_axisO,Vec3(1,1,1),pi/6)*[triA_0, triA_1, triA_2]
+# triB = rotate_arbitrary(g_axisO,Vec3(1,1,1),pi/6)*[triB_0, triB_1, triB_2]
+
+
+# 点接触
+# triB=trans(5, 2.5)*trans(0,-10)*triA
+# triB=rotate_arbitrary(Vec3(5, 2.5),Vec3(1,2), -pi/6)*triB
+r=random()
+triA = scale(1e5)*scale(r)*[triA_0, triA_1, triA_2]
+triB = scale(1e5)*scale(r)*[triB_0, triB_1, triB_2]
+
+triA = rotate_arbitrary(g_axisX,Vec3(1,1,1),pi/6)*triA
+triB = rotate_arbitrary(g_axisX,Vec3(1,1,1),pi/6)*triB
+
+# error data
+triA_0 = Vec3(0.0893163974770409, -0.3333333333333333, 0.24401693585629242)
+triA_1 = Vec3(208238.36291858187, 208237.94026885106, -20422.97691672161)
+triA_2 = Vec3(-64429.05675845014, 240452.51330627486, 88012.09429931616)
+triB_0 = Vec3(16107.37583510938, 168547.94954260648, -250664.2130895011)
+triB_1 = Vec3(192131.07639986995, 39689.65739291125, 230241.4801897153)
+triB_2 = Vec3(240452.93595600568, 88011.51694904697, -64428.90205791176)
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+create_geometry(Section(triA).colorBlue())
+create_geometry(Section(triB).colorGreen())
+
+isOnP=isTwoIntersectTrianglesCoplanar(triA,triB)
+isInter=isTwoTrianglesIntersectSAT(triA,triB)
+if isInter:
+    points=getTwoTrianglesIntersectPoints(triA,triB)
+    isCoin=(points[1].normalized()-points[0].normalized()).isZero() #compensating error
+    show_points_line(points)
+    if not isCoin:
+        printTrianglePair(triA,triB)
+
+print('return 0')
 

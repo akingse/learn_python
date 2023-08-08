@@ -473,7 +473,21 @@ class GeVec3d(BufferStackBase):
 
     def __repr__(self):
         return 'GeVec3d({self.x},{self.y},{self.z})'.format(self=self)
-
+    def __getitem__(self, index)->float:
+        if (index==0):
+            return self.x
+        elif (index==1):
+            return self.y
+        elif (index==2):
+            return self.z
+        else:
+            return float('nan')
+    # def x(self): # same name error
+    #     return self.x
+    # def y(self): 
+    #     return self.y
+    # def z(self): 
+    #     return self.z
     @property
     def x(self): return self._x
     @x.setter
@@ -487,10 +501,12 @@ class GeVec3d(BufferStackBase):
     @z.setter
     def z(self, val): self._z = float(val)
 
-    def norm(self):
+    def norm(self)->float:
         return sqrt(self.x*self.x+self.y*self.y+self.z*self.z)
-    def norm2(self):
+    def norm2(self)->float:
         return self.x*self.x+self.y*self.y+self.z*self.z
+    def squaredNorm(self)->float:
+        return self.norm2()
     def unitize(self):
         n = self.norm()
         if n < PL_A:
@@ -507,8 +523,9 @@ class GeVec3d(BufferStackBase):
         return self.unitize()
     def isOrigin(self):
         return self.norm() < PL_A
-    def isZero(self):
-        return self.isOrigin()
+    def isZero(self, eps=1e-14)->bool:
+        # return self.isOrigin()
+        return fabs(self.x)<eps and fabs(self.y)<eps and fabs(self.z)<eps
     def isValid(self):
         if (isnan(self.x) or isnan(self.y) or isnan(self.z)):
             return False

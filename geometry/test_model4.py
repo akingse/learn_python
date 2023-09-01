@@ -28,6 +28,8 @@ def _use_rand_create1(show=False):
         triB=[get_rand_point(3),get_rand_point(3),get_rand_point(3)]
         triA=[get_rand_point(2),get_rand_point(2),get_rand_point(2)]
         triB=[get_rand_point(2),get_rand_point(2),get_rand_point(2)] #scale(0.1)*
+        triA=[get_rand_pointF(2),get_rand_pointF(2),get_rand_pointF(2)]
+        triB=[get_rand_pointF(2),get_rand_pointF(2),get_rand_pointF(2)] 
         sum=0
         if (isTwoTrianglesIntersectSAT(triA,triB)):
             isInter=True
@@ -76,6 +78,7 @@ def _use_rand_create2(show=False):
     return countOut
 
 
+# 测试trigon和包围盒相交
 def _use_rand_create3(show=False):
     countOut=0
     # triA=[get_rand_point(2),get_rand_point(2),get_rand_point(2)]
@@ -90,44 +93,29 @@ def _use_rand_create3(show=False):
     return countOut
 
 
-countOut=0
-# for i in range(1000000): #100000
-#     countOut+=_use_rand_create3()
-# print('countOut=',countOut)
-_use_rand_create1(true)
+if __name__=='__main__':
+    countOut=0
+    # for i in range(1000000): #100000
+    #     countOut+=_use_rand_create3()
+    # print('countOut=',countOut)
+    # _use_rand_create1(true)
 
-# 精度测试
-segm1=[Vec3(1.1, 0.2), Vec3(12.2, 0.2)]
-segm2=[Vec3(2.2,5.7), Vec3(2.2,102.2)]
+# sat必须设置共面精度
+triA_0 = Vec3(-25.821536117840218, -96.71417745866091, 0.0000000000001)
+triA_1 = Vec3(-58.42881123375241, -4.310362237274479, 0.0)
+triA_2 = Vec3(70.29588573903484, -79.80572227527854, 0.0)
+triB_0 = Vec3(5.397058792347442, -14.83335310441496, 0.0)
+triB_1 = Vec3(18.301014372170044, -34.36799567085487, 0.0)
+triB_2 = Vec3(36.31968900922959, 96.3960383581501, 0.0)
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+# create_geometry(Section(triA).colorBlue())
+# create_geometry(Section(triB).colorGreen())
 
-segm1=roty(pi/4)*[Vec3(-2.2, 1.2), Vec3(12.2, 1.2)]
-segm2=roty(pi/4)*[Vec3(2.2,5.7), Vec3(2.2,102.2)]
-
-d1=(segm1[1]-segm1[0]).dot(segm2[1]-segm2[0])
-
-def _getSegmentIntersect(segmA,segmB):
-    # vecA=segmA[1]-segmA[0]
-    m1=(segmA[0]-segmB[0]).cross(segmA[0]-segmB[1])
-    m2=(segmB[0]-segmB[1]).cross(segmA[1]-segmA[0])
-    k= sqrt(m1.norm2()/m2.norm2())
-    return segmA[0]+k*(segmA[1]-segmA[0])
-
-# 线段相交，叉乘
-segm1=[Vec3(-5, 1), Vec3(9, 5)]
-segm2=[Vec3(7, -1), Vec3(0,4)]
-# show_points_line(segm1)
-# show_points_line(segm2)
-# point=_getSegmentIntersect(segm1,segm2)
-# show_points_line([point])
-
-a=math.inf
-a=DBL_MAX
-
-# 点在线上，误差的影响
-point = rotz(pi/3)*Vec3(1.1, 1.2, -1)
-trigon = rotz(pi/3)*[Vec3(0, 0), Vec3(2.2, 2.4)]
-cp = (point - trigon[1]).cross(point - trigon[0])
+res=isTwoTrianglesIntersectSAT(triA,triB)
+a=Vec3(4929001.73, -378741.05, 0.00
+)
+b=Vec3(4928984.49,-378757.96, 0.00
+)
+print((a-b).norm())
 print('return 0')
-
-
-

@@ -5,6 +5,68 @@ sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
 DBL_EPSILON=2.2204460492503131e-016
 
+
+# 两处分离 count_error_tris_sepa
+(1521,1519) #dminB=-2.3283064365386963e-10 #iB=28
+(2978,2976) #dminA=-2.3283064365386963e-10 #iA=13
+
+# 法向量选取敏感
+# triA_0 = Vec3(4936998.2332053846, -383787.17924958991, 6015.6846000000369)
+# triA_1 = Vec3(4937024.8494758252, -383779.28694613208, 6070.1700860465535)
+# triA_2 = Vec3(4937029.5225078566, -383777.90129043174, 6060.6040417688109)
+# triB_0 = Vec3(4937021.0285847718, -383780.41992348642, 6057.7254248593736)
+# triB_1 = Vec3(4937022.2016856968, -383780.07207353070, 6050.0000000000000)
+# triB_2 = Vec3(4936824.6681833472, -383113.90342609736, 6050.0000000000000)
+
+# 法向量单位化敏感
+triA_0 = Vec3(4936998.2332053846, -383787.17924958991, 6015.6846000000369)#ia=13
+triA_1 = Vec3(4937029.5225078566, -383777.90129043174, 6060.6040417688109)
+triA_2 = Vec3(4937031.1327249566, -383777.42382601701, 6050.0000000000364)
+triB_0 = Vec3(4937017.6241132868, -383781.42942337599, 6035.3053686926878) #ib=28
+triB_1 = Vec3(4937021.0285847718, -383780.41992348642, 6042.2745751406264)
+triB_2 = Vec3(4936974.2647250723, -383794.28642564808, 6050.0000000000000)
+
+
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+normalA=(triA[1]-triA[2]).cross(triA[2]-triA[0])#.normalized()
+d0=normalA.dot(triB[0]-triA[0])
+d1=normalA.dot(triB[0]-triA[1])
+d2=normalA.dot(triB[0]-triA[2])
+
+# show_points_line(triA)
+# show_points_line(triB)
+# create_geometry(Section(triA).colorRed())
+# create_geometry(Section(triB).colorGreen())
+
+# 投影测试
+normalA=(triA[1]-triA[0]).cross(triA[2]-triA[1])#.normalized()
+normalB=(triB[1]-triB[0]).cross(triB[2]-triB[0])#.normalized()
+minA = DBL_MAX;
+maxA = -DBL_MAX;
+minB = DBL_MAX;
+maxB = -DBL_MAX;
+for vertexA in triA:
+    projection = normalA.dot(vertexA)
+    minA = min(minA, projection)
+    maxA = max(maxA, projection)
+for vertexB in triB:
+    projection = normalA.dot(vertexB)
+    minB = min(minB, projection)
+    maxB = max(maxB, projection)
+min1=maxA - minB #-2.3283064365386963e-10
+min2=maxB - minA #694.8382195695303
+isInter=True
+if maxA < minB or maxB < minA:
+    isInter=False
+isi=isTwoTrianglesIntersectSAT(triA,triB)
+
+
+A0 = Vec3(-986.90,-3035.80,0.00)
+A1 = Vec3(-1876.85,-2315.13 , 0.00)
+d=(A0-A1).norm()
+
+exit()
 # 测试三角形与包围盒相交
 # res=isTriangleBoundingBoxIntersect(trigon, [Vec3(100,100,100),Vec3(700,600,500)])
 
@@ -122,7 +184,7 @@ segmB_move = [ segmB[0] + d_P2L * vectZ, segmB[1] + d_P2L * vectZ ]
 # create_geometry(Section(triB0,triB1,triB2))
 
 # res=is_two_triangles_bounding_box_intersect([triA_0,triA_1,triA_2],[triB_0,triB_1,triB_2],0.001)
-res = isTwoTrianglesIntersectSAT(triA, triB)
+# res = isTwoTrianglesIntersectSAT(triA, triB)
 # print(res)
 res = isSegmentAndTriangleIntersctSAT([triA_0, triA_1], triB)
 # print(res)
@@ -158,7 +220,7 @@ triB_2 = Vec3(4934979.1061984757, -380736.84932394756, -193.49438164979355)
 triA = [triA_0, triA_1, triA_2]
 triB = [triB_0, triB_1, triB_2]
 # res=isPointInTriangle(g_axisNaN,triA)
-res=isTwoTrianglesIntersectSAT(triA,triB)
+# res=isTwoTrianglesIntersectSAT(triA,triB)
 # create_geometry(Section(triA).colorBlue())
 # create_geometry(Section(triB).colorGreen())
 
@@ -180,62 +242,7 @@ triB = [triB_0, triB_1, triB_2]
 # create_bounding_box(box)
 # create_geometry(Section(triB).colorGreen())
 
-# 测试交点的精度
-for i in range(0):
-    # triA_0 = scale(randint(0,100))*Vec3(0, 0, 10)
-    # triA_1 = scale(randint(0,100))*Vec3(10, 5, 0)
-    # triA_2 = scale(randint(0,100))*Vec3(0, 10, 0)
-    triA_0 = scale(random())*Vec3(1, 2, 10)
-    triA_1 = scale(random())*Vec3(10, 5, 1)
-    triA_2 = scale(random())*Vec3(3, 10, 3)
-    triA = [triA_0, triA_1, triA_2]
-    create_geometry(Section(triA).colorBlue())
-    line=scale(random())*[Vec3(-1, -2, -10),Vec3(11, 12, 13)]
-    # line=Line([Vec3(0, 0, -10),Vec3(10, 10, 10)])
-    create_geometry(Line(line))
-    point=getIntersectOfSegmentAndPlaneINF(line,triA)
-    normalA = (triA[1] - triA[0]).cross(triA[2] - triA[0]).normalized()
-    isOn1=(point-triA[0]).dot(normalA) #1.0269562977782698e-15
-    isOnP=(point-triA[0]).normalized().dot(normalA) # 1.457167719820518e-16
-    isOnb=fabs(isOnP)<DBL_EPSILON
-    # show_points_line([point],1)
-    print('return 0')
 
-# 面接触
-triA_0 = Vec3(0, 0, 0)
-triA_1 = Vec3(10, 5, 0)# Vec3(10, 5, 0.000001) #相对值和设置的eps有关
-triA_2 = Vec3(0, 10, 0)
-# triB_0 = Vec3(3, 0, 0)
-# triB_1 = Vec3(3, 10, 0)
-# triB_2 = Vec3(-2, 5, 0)
-triB_0 = Vec3(0, 0, 0)
-triB_1 = Vec3(10, 5, 0)
-triB_2 = Vec3(10, -5, 0)
-
-triA = [triA_0, triA_1, triA_2]
-# triB = trans(5,2.5)*scale(0.6)*[triB_0, triB_1, triB_2]
-triB = trans(2.5,1.25)*scale(0.6)*[triB_0, triB_1, triB_2]
-
-# 线接触
-triA_0 = Vec3(0, 0, 0)
-triA_1 = Vec3(10, 5, 0)
-triA_2 = Vec3(0, 10, 0)
-triB_0 = Vec3(5, 2.5, -10)
-triB_1 = Vec3(5, 2.5, 10) #Vec3(5, 2.5, 1e8)共线判断必须单位化，否则精度的影响是致命的
-triB_2 = Vec3(10, 0, 0)
-# triA = rotate_arbitrary(g_axisO,Vec3(1,1,1),pi/6)*[triA_0, triA_1, triA_2]
-# triB = rotate_arbitrary(g_axisO,Vec3(1,1,1),pi/6)*[triB_0, triB_1, triB_2]
-
-
-# 点接触
-# triB=trans(5, 2.5)*trans(0,-10)*triA
-# triB=rotate_arbitrary(Vec3(5, 2.5),Vec3(1,2), -pi/6)*triB
-r=random()
-triA = scale(1e5)*scale(r)*[triA_0, triA_1, triA_2]
-triB = scale(1e5)*scale(r)*[triB_0, triB_1, triB_2]
-
-triA = rotate_arbitrary(g_axisX,Vec3(1,1,1),pi/6)*triA
-triB = rotate_arbitrary(g_axisX,Vec3(1,1,1),pi/6)*triB
 
 # error data
 triA_0 = Vec3(0.0893163974770409, -0.3333333333333333, 0.24401693585629242)
@@ -244,10 +251,29 @@ triA_2 = Vec3(-64429.05675845014, 240452.51330627486, 88012.09429931616)
 triB_0 = Vec3(16107.37583510938, 168547.94954260648, -250664.2130895011)
 triB_1 = Vec3(192131.07639986995, 39689.65739291125, 230241.4801897153)
 triB_2 = Vec3(240452.93595600568, 88011.51694904697, -64428.90205791176)
+
+# 多检 4042
+triA_0 = Vec3(4928908.8549356647, -379098.99802352960, 5300.5882503080156)
+triA_1 = Vec3(4928951.2693946697, -379073.53023154044, 5293.0587675485622)
+triA_2 = Vec3(4928917.3282691725, -379107.47135703737, 5293.0587675485622)
+triB_0 = Vec3(4928868.9587669680, -379138.89419222699, 5300.5882503080175)
+triB_1 = Vec3(4928902.8998924643, -379104.95306673006, 5300.5882503080175)
+triB_2 = Vec3(4928911.3732259721, -379113.42640023783, 5293.0587675485640)
+
+# 漏检
+triA_0 = Vec3(4934991.0849248841, -380736.84932345786, -216.33004252886147)
+triA_1 = Vec3(4934991.0849241894, -380719.84932345781, -216.33004252886150)
+triA_2 = Vec3(4934984.3686963469, -380736.84932373225, -213.09567733115546)
+triB_0 = Vec3(4934994.8122385293, -382890.18308486621, -217.00000000000003)
+triB_1 = Vec3(4934994.8121505287, -380736.84932330565, -217.00000000000003)
+triB_2 = Vec3(4934988.3065321781, -380736.84932357143, -215.70595205269194)
+
 triA = [triA_0, triA_1, triA_2]
 triB = [triB_0, triB_1, triB_2]
-create_geometry(Section(triA).colorBlue())
-create_geometry(Section(triB).colorGreen())
+show_points_line(triA)
+show_points_line(triB)
+# create_geometry(Section(triA).colorBlue())
+# create_geometry(Section(triB).colorGreen())
 
 isOnP=isTwoIntersectTrianglesCoplanar(triA,triB)
 isInter=isTwoTrianglesIntersectSAT(triA,triB)
@@ -258,5 +284,46 @@ if isInter:
     if not isCoin:
         printTrianglePair(triA,triB)
 
+normalA=Vec3(158.64800246247256, 158.64800246383294, -641.19020573304635)
+normalB=Vec3(158.64800246273606, 158.64800246384152, -641.19020573359614)
+res=normalA.cross(normalB)#.normalized()
+
+triA_0 = Vec3(4953793.7635708954, -380470.36791451310, 5374.9999999999973)
+triA_1 = Vec3(4953786.0381460357, -380470.36791451328, 5373.7764129086099)
+triA_2 = Vec3(4953768.7635708908, -380470.36791451310, 5349.9999999999973)
+# 
+triA_0 = Vec3(4924394.8109916216, -384850.18553675176, 5350.0000000000000) #射线法
+triA_1 = Vec3(4924500.8160422733, -384850.18553675176, 5350.0000000000000)
+triA_2 = Vec3(4924500.8160422733, -384848.80657192180, 5362.2386513675974)
+triA_0 = Vec3(4924394.8109916216, -384741.56450158177, 5362.2386513675974)
+triA_1 = Vec3(4924500.8160422733, -384740.18553675181, 5350.0000000000000)
+triA_2 = Vec3(4924394.8109916216, -384740.18553675181, 5350.0000000000000)
+
+local=Vec3(4924495.0371611277, -384740.18553675181, 5350.0000000000000)
+point=Vec3(4924462.4494786421, -384810.65870177309, 5350.0000000000000)
+triA = [triA_0, triA_1, triA_2]
+# create_geometry(Section(triA).colorBlue())
+# show_points_line([point,local])
+
+
+exit()
+
+normal=(triA_1-triA_0).cross(triA_2-triA_0)
+
+
+point = Vec3(4953779.0689395862, -380470.36791451310, 5329.7745751388647)
+projection = normal.dot(point- triA_0)
+eps=2.2204460492503131e-016
+isleft=normal.squaredNorm() * eps
+
+# inside
+point = (4924601.8102601077, -385940.89359764993, 5750.0000000000000)
+normal=(-0.0000000000000000, -0.0000000000000000, 4383.1388016323535)
+p0=(4924607.1200010674, -386134.23434551037, 6139.9999999999045)
+
+
+p1=Vec3(4933744.68, -383035.56, 0.00)
+p2=Vec3(4933692.36, -383087.67,0.00)
+print((p1-p2).norm())
 print('return 0')
 

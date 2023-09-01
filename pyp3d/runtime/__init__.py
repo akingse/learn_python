@@ -60,8 +60,7 @@ class _UnifiedModule:
             return self._getattr(moduleName, methodName)(*args)
 _sysPathSet = set()
 _globalScript = os.path.splitext(sys.argv[0])[0] #路径问题
-_globalSource = os.path.split(sys.argv[0])[0]
-_globalSource = sys.argv[0]
+_globalSource = os.path.split(sys.argv[0])[0]  
 def get_core_source(): 
     global _globalSource
     return _globalSource

@@ -27,8 +27,8 @@ for clashresult in tree.getroot().find('batchtest').find('clashtests').find('cla
     # segment = [GeVec3d(float(pos.get('xS')), float(pos.get('yS')), float(pos.get('zS'))),
     #            GeVec3d(float(pos.get('xE')), float(pos.get('yE')), float(pos.get('zE')))]
     # create_geometry(geo)
-    pointS=pos.get('pointS').split(',')
-    pointE=pos.get('pointE').split(',')
+    pointS=pos.get('positionA').split(',')
+    pointE=pos.get('positionB').split(',')
     pointS=Vec3(float(pointS[0]),float(pointS[1]),float(pointS[2]))
     pointE=Vec3(float(pointE[0]),float(pointE[1]),float(pointE[2]))
 

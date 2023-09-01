@@ -20,8 +20,8 @@ DBL_MAX = 1.7976931348623157e+308
 
 
 def create_bounding_box(box):
-    min=box[0]# GeVec3d
-    max=box[1]# GeVec3d
+    min = box[0]  # GeVec3d
+    max = box[1]  # GeVec3d
     create_geometry(trans(min)*scale(max-min)*Cube())
 
 
@@ -52,19 +52,34 @@ def get_rand_point(demi=2) -> GeVec3d:
         return GeVec3d(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
 
 
+def get_rand_pointF(demi=2) -> GeVec3d:
+    rg = 200
+    if demi == 2:
+        return scale(rg)*GeVec3d(random()-0.5, random()-0.5)
+    elif demi == 3:
+        return scale(rg)*GeVec3d(random()-0.5, random()-0.5, random()-0.5)
+
+
 def get_rand_box() -> list:
     rg = 100
     # _min = get_rand_point(2) #
-    _min=get_rand_point(3) #GeVec3d(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
+    # GeVec3d(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
+    _min = get_rand_point(3)
     return [_min, _min+GeVec3d(randint(rg/2, rg), randint(rg/2, rg), randint(rg/2, rg))]
 
 
-def gen_rand_point(is2D=True) -> Point:
-    rg = 100
-    if is2D:
-        return Point(randint(-rg, rg), randint(-rg, rg), 0)
+def get_rand_triangle(isFloat=True, demi=2):
+    if isFloat:
+        return [get_rand_pointF(demi), get_rand_pointF(demi), get_rand_pointF(demi)]
     else:
-        return Point(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
+        return [get_rand_point(demi), get_rand_point(demi), get_rand_point(demi)]
+
+# def gen_rand_point(is2D=True) -> Point:
+#     rg = 100
+#     if is2D:
+#         return Point(randint(-rg, rg), randint(-rg, rg), 0)
+#     else:
+#         return Point(randint(-rg, rg), randint(-rg, rg), randint(-rg, rg))
 
 
 def isPointInTriangle2D(point, trigon) -> bool:  # 2D
@@ -100,9 +115,14 @@ def isPointInTriangle2D(point, trigon) -> bool:  # 2D
     #     return not (((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y) > 0.0) or  # bool isLeftA
     #             ((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y) > 0.0) or # bool isLeftB
     #             ((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y) > 0.0))  # bool isLeftC
-
+    if (point.x > max(max(trigon[0][0], trigon[1][0]), trigon[2][0]) or
+        point.x < min(min(trigon[0][0], trigon[1][0]), trigon[2][0]) or
+        point.y > max(max(trigon[0][1], trigon[1][1]), trigon[2][1]) or
+            point.y < min(min(trigon[0][1], trigon[1][1]), trigon[2][1])):
+        return false
     axisz = (p1.x - p0.x) * (p2.y - p0.y) - (p2.x - p0.x) * (p1.y - p0.y)
-    return (0.0 <= axisz*((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y))) and \
+    return \
+        (0.0 <= axisz*((p1.x - p0.x) * (point.y - p0.y) - (point.x - p0.x) * (p1.y - p0.y))) and \
         (0.0 <= axisz*((p2.x - p1.x) * (point.y - p1.y) - (point.x - p1.x) * (p2.y - p1.y))) and \
         (0.0 <= axisz*((p0.x - p2.x) * (point.y - p2.y) - (point.x - p2.x) * (p0.y - p2.y)))
 
@@ -114,19 +134,20 @@ def isPointInTriangle(point: GeVec3d, trigon: list) -> bool:  # must coplanar
         point[1] < min(min(trigon[0][1], trigon[1][1]), trigon[2][1]) or
         point[1] > max(max(trigon[0][1], trigon[1][1]), trigon[2][1]) or
         point[2] < min(min(trigon[0][2], trigon[1][2]), trigon[2][2]) or
-        point[2] > max(max(trigon[0][2], trigon[1][2]), trigon[2][2])):
-        return False # using absolute zero
+            point[2] > max(max(trigon[0][2], trigon[1][2]), trigon[2][2])):
+        return False  # using absolute zero
     vecZ = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0]).normalized()
-    isNorm=False #True #
+    isNorm = True  # False #
     if isNorm:
-    # big number must normalized, otherwise point on edge will error
-        return _eps < ((trigon[1] - trigon[0]).normalized().cross((point - trigon[0]).normalized())).dot(vecZ) and \
-            _eps < ((trigon[2] - trigon[1]).normalized().cross((point - trigon[1]).normalized())).dot(vecZ) and \
-            _eps < ((trigon[0] - trigon[2]).normalized().cross((point - trigon[2]).normalized())).dot(vecZ)
+        # big number must normalized, otherwise point on edge will error
+        return not (((trigon[1] - trigon[0]).normalized()).cross((point - trigon[0]).normalized()).dot(vecZ) < _eps or
+                    ((trigon[2] - trigon[1]).normalized()).cross((point - trigon[1]).normalized()).dot(vecZ) < _eps or
+                    ((trigon[0] - trigon[2]).normalized()).cross((point - trigon[2]).normalized()).dot(vecZ) < _eps)
     else:
-        return not ((trigon[1] - trigon[0]).cross( point - trigon[0]).dot(vecZ) < _eps or
-                    (trigon[2] - trigon[1]).cross( point - trigon[1]).dot(vecZ) < _eps or
-                    (trigon[0] - trigon[2]).cross( point - trigon[2]).dot(vecZ) < _eps)
+        return not ((trigon[1] - trigon[0]).cross(point - trigon[0]).dot(vecZ) < _eps or
+                    (trigon[2] - trigon[1]).cross(point - trigon[1]).dot(vecZ) < _eps or
+                    (trigon[0] - trigon[2]).cross(point - trigon[2]).dot(vecZ) < _eps)
+
 
 def printTriangle(trigon):
     print_vector(trigon[0])
@@ -232,33 +253,34 @@ def isTwoTrianglesIntersectSAT(triA, triB) -> bool:
     #             (edgesB[0]).normalized(),
     #             (edgesB[1]).normalized(),
     #             (edgesB[2]).normalized()]
-    normalA = edgesA[0].cross(edgesA[1])
-    normalB = edgesB[0].cross(edgesB[1])
-    if (normalA.cross(normalB).normalized().norm()<eps): #isZero()
-        axes = [edgesA[0].cross(edgesA[1]),
-                # edgesA[0],
-                # edgesA[1],
-                # edgesA[2],
-                # edgesB[0],
-                # edgesB[1],
-                # edgesB[2],
-                # crossAB
-                normalA.cross(edgesA[0]),
-                normalA.cross(edgesA[1]),
-                normalA.cross(edgesA[2]),
-                normalB.cross(edgesB[0]),
-                normalB.cross(edgesB[1]),
-                normalB.cross(edgesB[2])]
-    else:
-        axes = [
-            # edgesA[0],
-            # edgesA[1],
-            # edgesA[2],
-            # edgesB[0],
-            # edgesB[1],
-            # edgesB[2],
-            edgesA[0].cross(edgesA[1]),
-            edgesB[0].cross(edgesB[1]),
+    normalA = -edgesA[0].cross(edgesA[1]) .normalized()
+    normalB = edgesB[0].cross(edgesB[1])  # .normalized()
+    # if (normalA.cross(normalB).isZero(eps)): # canbe absolute zero
+    axesN = [normalA,
+             normalB]
+    projection0 = normalA.dot(triB[0]-triA[1])
+    projection1 = normalA.dot(triB[1]-triA[1])
+    projection2 = normalA.dot(triB[2]-triA[1])
+    if (0.0 < projection0 and 0.0 < projection1 and 0.0 < projection2) or\
+        (0.0 > projection0 and 0.0 > projection1 and 0.0 > projection2):
+        pass #return False
+    projection0 = normalB.dot(triA[0]-triB[1])
+    projection1 = normalB.dot(triA[1]-triB[1])
+    projection2 = normalB.dot(triA[2]-triB[1])
+    if (0.0 < projection0 and 0.0 < projection1 and 0.0 < projection2) or \
+        (0.0 > projection0 and 0.0 > projection1 and 0.0 > projection2):
+        pass #return False
+
+    axes = [
+            normalA,
+            normalB,
+            # crossN
+            normalA.cross(edgesA[0]),
+            normalA.cross(edgesA[1]),
+            normalA.cross(edgesA[2]),
+            normalB.cross(edgesB[0]),
+            normalB.cross(edgesB[1]),
+            normalB.cross(edgesB[2]),
             # crossAB
             edgesA[0].cross(edgesB[0]),
             edgesA[0].cross(edgesB[1]),
@@ -268,7 +290,8 @@ def isTwoTrianglesIntersectSAT(triA, triB) -> bool:
             edgesA[1].cross(edgesB[2]),
             edgesA[2].cross(edgesB[0]),
             edgesA[2].cross(edgesB[1]),
-            edgesA[2].cross(edgesB[2])]
+            edgesA[2].cross(edgesB[2])            ]
+    
     # for axis in axes:
     #     create_geometry(Line(Vec3(),axis).colorRand())
     # show_points_line([triA[0],triA[1]])
@@ -276,12 +299,12 @@ def isTwoTrianglesIntersectSAT(triA, triB) -> bool:
     # show_points_line([triB[0],triB[0]+edgesA[0]])
     # create_geometry(Line(Vec3(),axes[0]).colorRand())
     for axis in axes:
-        dotA0 = triA[0].dot(axis)
-        dotA1 = triA[1].dot(axis)
-        dotA2 = triA[2].dot(axis)
-        dotB0 = triB[0].dot(axis)
-        dotB1 = triB[1].dot(axis)
-        dotB2 = triB[2].dot(axis)
+        dotA0 = axis.dot(triA[0])
+        dotA1 = axis.dot(triA[1])
+        dotA2 = axis.dot(triA[2])
+        dotB0 = axis.dot(triB[0])
+        dotB1 = axis.dot(triB[1])
+        dotB2 = axis.dot(triB[2])
         minA = min(min(dotA0, dotA1), dotA2)
         maxA = max(max(dotA0, dotA1), dotA2)
         minB = min(min(dotB0, dotB1), dotB2)
@@ -399,7 +422,7 @@ def isTriangleAndBoundingBoxIntersectSAT(trigon, box):
         max(p0.y, p1.y, p2.y) < _min.y or
         min(p0.y, p1.y, p2.y) > _max.y or
         max(p0.z, p1.z, p2.z) < _min.z or
-        min(p0.z, p1.z, p2.z) > _max.z):
+            min(p0.z, p1.z, p2.z) > _max.z):
         return False
     edges = [p1 - p0, p2 - p1, p0 - p2]
     coords = [GeVec3d(1, 0, 0), GeVec3d(0, 1, 0), GeVec3d(0, 0, 1)]
@@ -593,21 +616,25 @@ def _getIntersectOfSegmentAndPlaneINF(segment,  plane, vecSeg) -> float:
         return DBL_MAX if(fabs((segment[0] - plane[0]).normalized().dot(normal.normalized())) < eps) else -DBL_MAX
     return (plane[0] - segment[0]).dot(normal) / vecSeg[0].dot(normal)
 
+
 def getIntersectOfSegmentAndPlaneINF(segment,  plane) -> GeVec3d:
     normal = (plane[1] - plane[0]).cross(plane[2] - plane[1])
-    vecSeg=[g_axisNaN]
+    vecSeg = [g_axisNaN]
     vecSeg[0] = segment[1] - segment[0]
-    if (fabs(vecSeg[0].normalized().dot(normal.normalized())) < eps): #parallel
-        return g_axisNaN #DBL_MAX if(fabs((segment[0] - plane[0]).dot(normal)) < eps) else -DBL_MAX
+    if (fabs(vecSeg[0].normalized().dot(normal.normalized())) < eps):  # parallel
+        # DBL_MAX if(fabs((segment[0] - plane[0]).dot(normal)) < eps) else -DBL_MAX
+        return g_axisNaN
     k = (plane[0] - segment[0]).dot(normal) / vecSeg[0].dot(normal)
     local = segment[0] + k * vecSeg[0]
     return local
 
-def isTwoIntersectTrianglesCoplanar(triA,triB)->bool: #must intersect
-    normalA = (triA[1] - triA[0]).cross(triA[2] - triA[0])#.normalized()
-    normalB = (triB[1] - triB[0]).cross(triB[2] - triB[0])#.normalized()
+
+def isTwoIntersectTrianglesCoplanar(triA, triB) -> bool:  # must intersect
+    normalA = (triA[1] - triA[0]).cross(triA[2] - triA[0])  # .normalized()
+    normalB = (triB[1] - triB[0]).cross(triB[2] - triB[0])  # .normalized()
     # croPro=normalA.cross(normalB)
     return normalA.cross(normalB).normalized().isZero(eps)
+
 
 def _getPointOfTwoIntersectSegments(segmA,  segmB) -> float:
     normal = (segmB[0] - segmB[1]).cross(segmA[1]-segmA[0])
@@ -638,10 +665,10 @@ def getTwoTrianglesIntersectPoints(triA, triB):
                     continue
                 k2 = _getPointOfTwoIntersectSegments(edgeA, edgeB)
                 if k2 == DBL_MAX:  # collinear
-                    if (edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 and (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0: 
-                        res =edgeA
-                    elif (edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 and (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0 :
-                        res =edgeB
+                    if (edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 and (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0:
+                        res = edgeA
+                    elif (edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 and (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0:
+                        res = edgeB
                     else:
                         res[0] = edgeA[0] if (
                             edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 else edgeA[1]
@@ -670,10 +697,10 @@ def getTwoTrianglesIntersectPoints(triA, triB):
                     continue
                 k2 = _getPointOfTwoIntersectSegments(edgeB, edgeA)
                 if k2 == DBL_MAX:  # collinear
-                    if (edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 and (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0: 
-                        res =edgeA
-                    elif (edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 and (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0 :
-                        res =edgeB
+                    if (edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 and (edgeA[1] - edgeB[0]).dot(edgeA[1] - edgeB[1]) <= 0:
+                        res = edgeA
+                    elif (edgeB[0] - edgeA[0]).dot(edgeB[0] - edgeA[1]) <= 0 and (edgeB[1] - edgeA[0]).dot(edgeB[1] - edgeA[1]) <= 0:
+                        res = edgeB
                     else:
                         res[0] = edgeA[0] if (
                             edgeA[0] - edgeB[0]).dot(edgeA[0] - edgeB[1]) <= 0 else edgeA[1]

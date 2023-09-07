@@ -24,9 +24,13 @@ def sweep_stere(sec: Section, line: Line, isSmooth=False) -> Combine:
     if lenSegm == 1:
         return Sweep(sec, line)
     # is line start point locate on first section
-    if not is_point_in_contourline(points[0], sec):
+    if (isinstance(sec,Fusion)):
+        secR=sec.parts[0]
+    elif (isinstance(sec,Section)):
+        secR=sec
+    if not is_point_in_contourline(points[0], secR):
         # get the refer point, to decide relative sweep path.
-        pointRefer = get_first_point_on_section(sec)-points[0]
+        pointRefer = get_first_point_on_section(secR)-points[0]
     else:
         pointRefer = g_axisO  # referM=GeTransform()
     secRefer = trans((-1.0)*pointRefer)*sec
@@ -44,6 +48,13 @@ def sweep_stere(sec: Section, line: Line, isSmooth=False) -> Combine:
         #     secII = Section(get_discrete_points_from_section(secList[i+1], 30))
         #     if is_two_sections_intersect(secI, secII) == "NOT_COPLANAR_INTER":
         #         raise ValueError('some section self-intersect!')
+        geoList=[]
+        # for i in range(len(secList)-1):
+        #     loft=Loft(secList[i],secList[i+1])
+        #     create_geometry(loft)
+        # for iter in secList:
+        #     show_points_line(get_nested_parts_from_section(iter))
+
         geo = Loft(secList)
         geo.smooth = isSmooth
     return trans(pointRefer)*geo

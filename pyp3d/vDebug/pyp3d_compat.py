@@ -181,10 +181,10 @@ class RuledSweepPlus(Loft):  # 直纹扫描+
             self.parts.append(section)
 
 
-class TorusPipe(Sweep):  # 环形管 2.0
+class TorusPipe(Swept):  # 环形管 2.0
     def __init__(self, center=GeVec3d(0, 0, 0), vectorX=GeVec3d(1, 0, 0), vectorY=GeVec3d(0, 1, 0),
                  torusRadius=5, pipeRadius=1, sweepAngle=2*pi):
-        Sweep.__init__(self)
+        Swept.__init__(self)
         self.representation = 'TorusPipe'
         arcSection = trans(torusRadius, 0, 0)*scale(pipeRadius) * Arc()
         section = rotate(GeVec3d(1, 0, 0), pi/2)*Section(arcSection)
@@ -198,10 +198,10 @@ class TorusPipe(Sweep):  # 环形管 2.0
         self.trajectory = line
 
 
-class RotationalSweep(Sweep):  # 旋转扫描 (圆弧放样) 2.0
+class RotationalSweep(Swept):  # 旋转扫描 (圆弧放样) 2.0
     def __init__(self, points=[GeVec3d(2, 0, 0), GeVec3d(3, 0, 0), GeVec3d(2, 1, 0)],
                  center=GeVec3d(0, 0, 0), axis=GeVec3d(0, 1, 0), sweepAngle=1.5*pi):
-        Sweep.__init__(self)
+        Swept.__init__(self)
         self.representation = 'RotationalSweep'
         if all(isinstance(i, GeVec3d) for i in points):
             section = to_section(points)
@@ -215,9 +215,9 @@ class RotationalSweep(Sweep):  # 旋转扫描 (圆弧放样) 2.0
         self.trajectory = line
 
 
-class Extrusion(Sweep):  # 拉伸体 (直线放样) 2.0
+class Extrusion(Swept):  # 拉伸体 (直线放样) 2.0
     def __init__(self, points=[GeVec3d(1, 0, 0), GeVec3d(3, 0, 0), GeVec3d(3, 2, 0), GeVec3d(0, 2, 0)], extrusionVector=GeVec3d(1, 0, 1)):
-        Sweep.__init__(self)
+        Swept.__init__(self)
         self.representation = 'Extrusion'
         section = to_section(points)
         line = Line(points[0], points[0] + extrusionVector)
@@ -225,10 +225,10 @@ class Extrusion(Sweep):  # 拉伸体 (直线放样) 2.0
         self.trajectory = line
 
 
-class ExtrusionPlus(Sweep):  # 复杂拉伸体 2.0
+class ExtrusionPlus(Swept):  # 复杂拉伸体 2.0
     def __init__(self, contourLines=[ContourLine([Line(GeVec3d(2, -2, 0), GeVec3d(2, 2, 0), GeVec3d(-2, 2, 0), GeVec3d(-2, -2, 0))]),
                                      ContourLine([Ellipse()])], extrusionVector=GeVec3d(0, 0, 4)):
-        Sweep.__init__(self)
+        Swept.__init__(self)
         self.representation = 'ExtrusionPlus'
         if len(contourLines) == 0:
             raise TypeError('ExtrusionPlus() has one ContourLine at least!')

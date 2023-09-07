@@ -841,10 +841,171 @@ class Loft(Primitives):
         self[PARACMPT_LOFT_SMOOTH] = val
 
 
-class Sweep(Primitives):
+class Lofted(Primitives):
+    # new primitive, date202306
+    def __init__(self, *args):
+        Primitives.__init__(self)
+        self.representation = 'Lofted'
+        self.extractGraphics = UnifiedFunction(
+            PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_LOFTED_TO_GRAPHICS)
+        if len(args) == 2:  # non-support Intersect
+            if not isinstance(args[0], (Section, Fusion)) or not isinstance(args[1], (Section, Fusion)):
+                raise TypeError('improper type!')
+            self.guide_path = []  # auto process guideline at bimbase
+        elif len(args) == 3:
+            if not isinstance(args[0], (Section, Fusion)) or not isinstance(args[1], (Section, Fusion)) \
+                    or not isinstance(args[2], (list, tuple)):
+                raise TypeError('improper type!')
+            self.guide_path = args[2]  # auto process nest-list at bimbase
+            if len(self.guide_path) != 0 and (not isinstance(args[0], Fusion)):
+                if not isinstance(self.guide_path, (list, tuple)):  # single list
+                    raise TypeError('improper type!')
+                if (all(isinstance(iter, (list, tuple)) for iter in self.guide_path)):
+                    count_guide_path = len(self.guide_path[0])
+                    for iter in self.guide_path:
+                        if len(iter) != count_guide_path:
+                            raise TypeError(
+                                'guide_path and edges acount error!')
+                else:
+                    count_guide_path = len(self.guide_path)
+                if (count_guide_path != self._count_fragment_of_section(args[0])):
+                    raise TypeError('guide_path and edges acount error!')
+        else:
+            raise TypeError('improper type!')
+        self.bot_profile = args[0]
+        self.top_profile = args[1]
+        if (type(self.bot_profile) != type(self.top_profile)):
+            raise TypeError('improper type!')
+        if (self._count_fragment_of_section(self.bot_profile) != self._count_fragment_of_section(self.top_profile)):
+            raise TypeError('bot_profile and top_profile edges acount error!')
+        self.capped = True
+        self.showTest = False
+        # self.count_edge = self._count_fragment_of_section(self.bot_profile)
+
+    def _get_part_start_point(self, part) -> GeVec3d:
+        if isinstance(part, (GeVec2d, GeVec3d)):
+            return to_vec3(part)
+        elif isinstance(part, Arc):
+            return part.pointStart
+        elif isinstance(part, Segment):
+            return part.start
+        elif isinstance(part, SplineCurve):
+            return part.transformation*part.points[0]
+        elif isinstance(part, Line) and len(part.parts) > 0:
+            return self._get_part_start_point(part[0])
+        elif isinstance(part, list) and len(part) > 0:
+            if is_all_vec(part[0]):
+                return part[0]
+            else:
+                return self._get_part_start_point(part[0])
+        else:
+            raise ValueError('parameter type error!')
+
+    def _get_part_end_point(self, part) -> GeVec3d:
+        if isinstance(part, (GeVec2d, GeVec3d)):
+            return to_vec3(part)
+        elif isinstance(part, Arc):
+            return part.pointEnd
+        elif isinstance(part, Segment):
+            return part.end
+        elif isinstance(part, SplineCurve):
+            return part.transformation*part.points[-1]
+        elif isinstance(part, Line) and len(part.parts) > 0:
+            return self._get_part_end_point(part[-1])
+        elif isinstance(part, list) and len(part) > 0:
+            if is_all_vec(part[-1]):
+                return part[-1]
+            else:
+                return self._get_part_end_point(part[-1])
+        else:
+            raise ValueError('parameter type error!')
+
+    # nonsupport nest line
+    def _count_fragment_of_section(self, sec: Section) -> int:
+        if not isinstance(sec, Section):
+            return 0
+        count = 0
+        lenL = len(sec.parts)
+        for i in range(lenL-1):  # only add fragment which norm greater than zero
+            if not isinstance(sec.parts[i], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)) and \
+                    isinstance(sec.parts[i+1], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)):
+                raise ValueError('parameter type error!')
+            if isinstance(sec.parts[i], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)):
+                count += 1
+            if not is_coincident(self._get_part_end_point(sec.parts[i]), self._get_part_start_point(sec.parts[i+1])):
+                count += 1
+                if isinstance(sec.parts[i+1], (GeVec2d, GeVec3d)):
+                    count -= 1
+        _l = lenL-1
+        if isinstance(sec.parts[_l], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)):
+            count += 1
+        if not is_coincident(self._get_part_end_point(sec.parts[_l]), self._get_part_start_point(sec.parts[0])):
+            count += 1
+            if isinstance(sec.parts[0], (GeVec2d, GeVec3d)):
+                count -= 1
+        return count
+
+    # BOT
+    @ property
+    def bot_profile(self):
+        return self[PARACMPT_LOFTED_BOT_PROFILE]
+
+    @ bot_profile.setter
+    def bot_profile(self, val):
+        if not isinstance(val,  (Section, Fusion, Intersect)):
+            raise TypeError('Lofted improper type!')
+        self[PARACMPT_LOFTED_BOT_PROFILE] = val
+
+    # TOP
+    @ property
+    def top_profile(self):
+        return self[PARACMPT_LOFTED_TOP_PROFILE]
+
+    @ top_profile.setter
+    def top_profile(self, val):
+        if not isinstance(val,  (Section, Fusion, Intersect)):
+            raise TypeError('Lofted improper type!')
+        self[PARACMPT_LOFTED_TOP_PROFILE] = val
+
+    # GUIDE
+    @ property
+    def guide_path(self):
+        return self[PARACMPT_LOFTED_GUIDE_PATH]
+
+    @ guide_path.setter
+    def guide_path(self, val):
+        if not isinstance(val,  (list, tuple)):
+            raise TypeError('Lofted improper type!')
+        self[PARACMPT_LOFTED_GUIDE_PATH] = val
+
+    # CAP
+    @ property
+    def capped(self):
+        return self[PARACMPT_LOFTED_CAPPED]
+
+    @ capped.setter
+    def capped(self, val):
+        if not isinstance(val, bool):
+            raise TypeError('improper type!')
+        self[PARACMPT_LOFTED_CAPPED] = val
+
+    # SHOW
+    @ property
+    def showTest(self):
+        return self[PARACMPT_LOFTED_SHOWTEST]
+
+    @ showTest.setter
+    def showTest(self, val):
+        if not isinstance(val, bool):
+            raise TypeError('improper type!')
+        self[PARACMPT_LOFTED_SHOWTEST] = val
+
+
+class Swept(Primitives):
+    # exchange python Sweep name and Swept name, keep cpp name.
     def __init__(self, section=Section(), trajectory=Line()):
         Primitives.__init__(self)
-        self.representation = 'Sweep'
+        self.representation = 'Swept'
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_SWEEP_TO_GRAPHICS)
         self.section = section
@@ -853,7 +1014,7 @@ class Sweep(Primitives):
         elif isinstance(trajectory, GeVec3d):
             self.trajectory = Line(GeVec3d(), trajectory)
         else:
-            raise TypeError('Sweep trajectory TypeError!')
+            raise TypeError('Swept trajectory TypeError!')
         self.smooth = False
 
     @ property
@@ -863,7 +1024,7 @@ class Sweep(Primitives):
     @ section.setter
     def section(self, val):
         if not isinstance(val, (Section, Fusion, Intersect, Text)):
-            raise TypeError('Sweep improper type!')
+            raise TypeError('Swept improper type!')
         self[PARACMPT_SWEEP_SECTION] = val
 
     @ property
@@ -873,7 +1034,7 @@ class Sweep(Primitives):
     @ trajectory.setter
     def trajectory(self, val):
         if not isinstance(val, Line):
-            raise TypeError('Sweep improper type!')
+            raise TypeError('Swept improper type!')
         self[PARACMPT_SWEEP_TRAJECTORY] = val
 
     @ property
@@ -1226,9 +1387,7 @@ class ParametricEquation(Primitives):  # Parametric Equation
         self.representation = 'ParametricEquation'
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_PARAMETRICEQUATION_TO_GRAPHICS)
-
-        # def spiral_line_out(t, k=0.1)a;asldjlk;
-
+        # def spiral_line_out(t, k=0.1)
         self.fun = UnifiedFunction(func)
         self.t = stepList
 
@@ -1339,17 +1498,21 @@ class CrossBody(Primitives):  # 交叉布尔交体
         self[PARACMPT_CROSS_BODY_SMOOTH] = val
 
 
-class Swept(Primitives):  # 单截面沿曲线路径扫掠造型
+class Sweep(Primitives):  # 单截面沿曲线路径扫掠造型
     def __init__(self, seciton=Section(), line=Line()):
         Primitives.__init__(self)
-        self.representation = 'Swept'
+        self.representation = 'Sweep'
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_SWEPT_TO_GRAPHICS)
-        if not isinstance(seciton, (Section, Fusion, Intersect)):
-            raise TypeError('Swept parameter TypeError!')
+        if not isinstance(seciton, (Section, Fusion, Intersect, Text)):
+            raise TypeError('Sweep parameter TypeError!')
         self.profile = seciton
-        if not isinstance(line, Line):
-            raise TypeError('Swept parameter TypeError!')
+        if not isinstance(line, (Line,Arc,GeVec3d)):
+            raise TypeError('Sweep parameter TypeError!')
+        if isinstance(line,Arc):
+            line=Line(line)
+        elif isinstance(line,GeVec3d):
+            line=Line(GeVec3d(0,0),line)
         self.path = line
         self.capped = True
 
@@ -1359,8 +1522,8 @@ class Swept(Primitives):  # 单截面沿曲线路径扫掠造型
 
     @ profile.setter
     def profile(self, val):
-        if not isinstance(val, (Section, Fusion, Intersect)):
-            raise TypeError('Swept parameter TypeError!')
+        if not isinstance(val, (Section, Fusion, Intersect, Text)):
+            raise TypeError('Sweep parameter TypeError!')
         self[PARACMPT_SWEPT_PROFILE] = val
 
     @ property
@@ -1370,7 +1533,7 @@ class Swept(Primitives):  # 单截面沿曲线路径扫掠造型
     @ path.setter
     def path(self, val):
         if not isinstance(val, Line):
-            raise TypeError('Swept parameter TypeError!')
+            raise TypeError('Sweep parameter TypeError!')
         self[PARACMPT_SWEPT_PATH] = val
 
     @ property
@@ -1400,15 +1563,6 @@ class Segment(Primitives):  # 线段类（几何计算专用）
         self.m_start = pointStart
         self.m_end = pointEnd
 
-    # def __getitem__(self, index):  # to support index
-    #     if index == 0:
-    #         return self.transformation*self.m_start
-    #     elif index == 1:
-    #         return self.transformation*self.m_end
-    # def __rmul__(self, mat: GeTransform):
-    #     if isinstance(mat, GeTransform):
-    #         self.transform = mat*self.transform
-    #     return self
     @ property
     def m_start(self):
         return self[PARACMPT_SEGMENT_START]
@@ -1466,7 +1620,7 @@ class Segment(Primitives):  # 线段类（几何计算专用）
         return [self.transformation*self.m_start, self.transformation*self.m_end]
 
     def isCoincident(self):
-        pos = get_translate_matrix(self.transformation)
+        return is_coincident(self.m_start, self.m_end)
 
 
 class PosVec(Primitives):  # 位矢类（几何计算专用）

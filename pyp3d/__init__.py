@@ -12,7 +12,7 @@ if len(sys.path[-1]) > 1 and sys.path[-1][0] == '?':
 else:
     version = UnifiedFunction('BPParametricComponent', 'get_version')()
     isService = False
-print(version)
+# print(version)
 versionInformation = 'Internal debug version.'
 from .vDebug import *
 

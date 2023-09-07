@@ -380,7 +380,7 @@ def rectangle_diagonal(pointA: GeVec2d, pointC: GeVec2d, R=0.0) -> Section:  # �
         #                rotz(pi/2)*scale(R)*Arc(pi/2),
         #                q2-dy, p1+dy, trans(p1+dx+dy)*rotz(pi)*scale(R)*Arc(pi/2))
 
-
+rectangle_diagonal_section=rectangle_diagonal
 # ------------------------------------------------------------------------------------------
 # |                                        BODY                                            |
 # ------------------------------------------------------------------------------------------
@@ -426,6 +426,36 @@ def conus_underside_vertex(arc: Arc, pVertex: GeVec3d) -> Loft:  # （顶点）�
     arcT.scale_center(PL_E6)
     arcTop = trans(pVertex-pCenter)*Section(arcT)
     return Loft(arcBottom, arcTop)
+
+
+def FilletPipe_Sweep(points=[GeVec3d(0, 0, 0), GeVec3d(100, 0, 0),  GeVec3d(100, 0, 50), GeVec3d(200, 0, 0)], filletRadius=10.0, pipeRadius=2):  # 圆角管
+    line=[]
+    if (isinstance(filletRadius,list)):
+        filletRadius=filletRadius[1]
+    if len(points)==2:
+        pStartB=points[0]
+    for i in range(len(points)-2):
+        if (i==0):
+            pStartA=points[i]
+        else:
+            pStartA=pStartB
+        vecA=(points[i+1]-points[i]).unitize()
+        vecB=(points[i+2]-points[i+1]).unitize()
+        theta=get_angle_of_two_vectors(-vecA,vecB,True)
+        d=filletRadius/tan(theta/2)
+        pEndA=points[i+1]-d*vecA
+        line.append(Segment(pStartA,pEndA))
+        pStartB=points[i+1]+d*vecB
+        c=sqrt(d*d+filletRadius*filletRadius)
+        pCenter=points[i+1]+c*(0.5*(-vecA+vecB)).unitize()
+        arc=arc_of_center_points(pCenter,pEndA,pStartB)
+        line.append(arc)
+    line.append(Segment(pStartB,points[-1]))
+    mat=get_matrix_from_two_points(points[0],points[1])
+    sec=mat*scale(pipeRadius)*Section(Arc())
+    # create_geometry(sec)
+    # create_geometry(Line(line))
+    return Sweep(sec,Line(line))
 
 # ------------------------------------------------------------------------------------------
 # |                                        SHOW                                            |

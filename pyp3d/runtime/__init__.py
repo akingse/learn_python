@@ -257,7 +257,7 @@ class UnifiedFunction(BufferStackBase):
             raise ValueError('')
     def __call__(self, *args):  # 全局调用
         if (len(args)==0):
-            print('no bimbase run!')
+            # print('no bimbase run!')
             return 
         return _Core(b'actively', True)(self._moduleName, self._methodName, *args)
     def call(self, *args):      # 本地调用

@@ -3,8 +3,7 @@
 # Author: YouQi
 # Date: 2021/05/06
 _EXE_NAME = b"BIMBASE.exe" #b'TestGeometryForPython.exe'
-import time, platform, threading, types, struct, sys, os
-from typing import overload
+import time, platform, threading, sys
 if "Windows" == platform.system(): from . import _windows_interface as _c_i
 else: raise AssertionError()
 class NamedPipe:
@@ -54,7 +53,7 @@ class Port:
             self._pid = sys.argv[1]
         else:
             while True:
-                pids = _c_i.find_porcess(_EXE_NAME)
+                pids = _c_i.find_porcess(b"BIMBASE.exe") + _c_i.find_porcess(b"BIMBase.exe")
                 if len(pids) == 0: 
                     # raise RuntimeError('{0} not found. Please start {0}.'.format(_EXE_NAME))
                     print('bimbase not found!')

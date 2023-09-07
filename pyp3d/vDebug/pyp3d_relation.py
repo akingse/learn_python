@@ -49,10 +49,7 @@ def get_distance_of_point_line(point: GeVec3d, line: Segment) -> float:
     if is_coincident(line.start, line.end):
         return norm(point-line.start)
     return norm(C+dot(-1.0*vec, C)/dot(vec, vec)*vec)
-    p0=line.start
-    p1=line.end
-    k=(p1-p0)*(point-p0)/((p1-p0)*(p1-p0))
-    d=(p0+k*(p1-p0)-point).norm()
+
 
 # 获取点距公式中的点
 def get_nearest_point_of_point_line(point: GeVec3d, line: Segment) -> GeVec3d:
@@ -246,7 +243,7 @@ def get_distance_of_two_lines(lineA: Segment, lineB: Segment) -> float:
         point3 = inverse_orth(matA)*lineB.start
         point4 = inverse_orth(matA)*lineB.end
         # if abs(point3.z-point4.z)<PL_A: # vertical
-        return get_distance_of_point_line(g_axisO, Segment(point3, point4))
+        return get_distance_of_point_line(g_axisO, Segment(to_vec2(point3), to_vec2(point4)))
 
 
 # 平面中直线夹角

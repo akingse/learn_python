@@ -95,17 +95,21 @@ class DependentFile(BufferStackBase):
     '''
     def __init__(self):
         self.fildor = []
-    def readFile(self, path:str):
-        self.fildor = self._getAllFile(path)
-    def _getAllFile(self, path:str):
+    def readFile(self, path:str,path1 = '',path2=''):
+        self.fildor = self._getAllFile(path,path1,path2 )
+    def _getAllFile(self, path:str,path1:str,path2:str):
         if path == "":
             return
         if os.path.isdir(path):
             pathList = []
-            dirs = os.listdir(path)
+            dirs =[]
+            if path1 != '' and path2 !='':
+                dirs = [os.path.split(path1)[1], os.path.split(path2)[1]]
+            else:
+                dirs = os.listdir(path)
             for dir in dirs:
                 dirPath = os.path.join(path, dir)
-                res = self._getAllFile(dirPath)
+                res = self._getAllFile(dirPath,'','')
                 if len(res) != 0:
                     pathList.append(res)
             if len(pathList) == 0:
@@ -159,7 +163,7 @@ class Size_t(BufferStackBase, int):
     size_t, unsigned long long.
     '''
     def __new__(cls, *args, **kw): return int.__new__(cls, *args, **kw)
-    def _push_to(self, bs): bs += struct.pack(ULL, self)
+    def _push_to(self, bs): bs._imp += struct.pack(ULL, self)
     def _pop_from(self, bs): return Size_t(struct.unpack(ULL, bs.data)[0])
 def _push_list(value: list):
     bs = BufferStack()

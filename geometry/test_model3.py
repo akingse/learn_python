@@ -68,7 +68,6 @@ print(isPointInTriangle(mat*Vec3(200, 100), trigon))  # out
 print(isPointInTriangle(mat*Vec3(100, -20), trigon))  # out
 
 # exit(0)
-_test_fun = is_segment_cross_triangle_surface
 pS = Vec3(0, 0, 100)
 # print(_test_fun([pS,Vec3(0,0,0)],trigon)) #out
 # print(_test_fun([pS,Vec3(30,80)],trigon)) #out

@@ -630,8 +630,10 @@ class Section(Primitives):
         self.transformation = self._get_first_matrix_from_line(self.parts)
         if is_two_dimensional_matrix(self.transformation):
             self.transformation = GeTransform()
-        if not self._is_parts_on_same_plane(self.parts):
-            raise TypeError('Section parts must locate on same plane!')
+        self.samePlane=True
+        if self.samePlane:
+            if not self._is_parts_on_same_plane(self.parts):
+                raise TypeError('Section parts must locate on same plane!')
         self.parts = inverse_orth(self.transformation)*self.parts
 
     def append(self, value):

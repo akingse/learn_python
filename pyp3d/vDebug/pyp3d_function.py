@@ -302,6 +302,8 @@ def arc_of_segment_interrupt(segm: Segment, arc: Arc, cutStart=True) -> Arc:
         arcN.scope = arc.scope+angle
         return arcN
 
+def arc_semicircle_to_section(r:float)->Section:
+    return Section(scale(r)*Arc(pi),rotz(pi)*scale(r)*Arc(pi))
 
 # ------------------------------------------------------------------------------------------
 # |                                       PATTERN                                          |

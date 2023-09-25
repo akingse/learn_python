@@ -6,8 +6,11 @@
 from .pyp3d_math import *
 
 g_axisX = GeVec3d(1, 0, 0)
+g_axisX_ = GeVec3d(-1, 0, 0)
 g_axisY = GeVec3d(0, 1, 0)
+g_axisY_ = GeVec3d(0, -1, 0)
 g_axisZ = GeVec3d(0, 0, 1)
+g_axisZ_ = GeVec3d(0, 0, -1)
 g_axisO = GeVec3d(0, 0, 0)  # coordinate original point
 g_axisNaN = GeVec3d(float("nan"), float("nan"), float("nan"))
 g_matrixO = GeTransform(

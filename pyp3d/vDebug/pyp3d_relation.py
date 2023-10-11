@@ -831,14 +831,12 @@ def is_contourline_self_intersect(line: Line) -> str:
         if len(points) >= 1:
             return "SELF_INTER"
     for i in range(2, lenL-1):  # first segment
-        if get_intersect_points_of_fragments(frags[0], frags[i]):
-            if len(points) >= 1:
-                return "SELF_INTER"
+        if len(get_intersect_points_of_fragments(frags[0], frags[i])) >= 1:
+            return "SELF_INTER"
     for i in range(1, lenL):
         for j in range(i+2, lenL):  # range cannot from big to small
-            if get_intersect_points_of_fragments(frags[i], frags[j]):
-                if len(points) >= 1:
-                    return "SELF_INTER"
+            if len(get_intersect_points_of_fragments(frags[i], frags[j])) >= 1:
+                return "SELF_INTER"
     return "EACH_SEPA"
 
 

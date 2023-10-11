@@ -33,11 +33,11 @@ def get_matrix_from_two_points(point0: GeVec3d, point1: GeVec3d, isAxisZ=True) -
     return set_matrix_by_column_vectors(axisX, axisY, axisZ, point0)
 
 
-def get_matrix_from_one_vector(vector, isAxisZ=True) -> GeTransform:  # 一个列矢量创建矩阵
+def get_matrix_from_one_vector(vector: GeVec3d, isAxisZ=True) -> GeTransform:  # 一个列矢量创建矩阵
     return get_matrix_from_two_points(g_axisO, vector, isAxisZ)
 
 
-def set_matrix_by_two_vectors(vecX, vecY, isOrth=True) -> GeTransform:  # 两个列矢量创建矩阵
+def set_matrix_by_two_vectors(vecX: GeVec3d, vecY: GeVec3d, isOrth=True) -> GeTransform:  # 两个列矢量创建矩阵
     if norm(vecX)+norm(vecY) < PL_A:  # is all zero-vector
         return GeTransform()
     if (norm(vecX) * norm(vecY) < PL_A or norm(cross(vecX, vecY)) < PL_A):  # there is zero-vector or collinear

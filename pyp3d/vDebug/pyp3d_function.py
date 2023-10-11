@@ -305,6 +305,9 @@ def arc_of_segment_interrupt(segm: Segment, arc: Arc, cutStart=True) -> Arc:
 def arc_semicircle_to_section(r:float)->Section:
     return Section(scale(r)*Arc(pi),rotz(pi)*scale(r)*Arc(pi))
 
+def arc_of_scope_and_radius_2D(R, scope, angle=0.0) -> Arc:
+    return rotz(angle)*scale(R)*Arc(scope)
+
 # ------------------------------------------------------------------------------------------
 # |                                       PATTERN                                          |
 # ------------------------------------------------------------------------------------------
@@ -700,5 +703,20 @@ def get_nearest_distance_of_two_segment(seg1: Segment, seg2: Segment) -> float:
     return min(dmin1, dmin2)
 
 
-def arc_of_angle_and_radius_2D(angle, R, scope) -> Arc:
-    return scale(R)*Arc(scope)
+def check_section_self_intersect(section:Section)->bool:
+    fragms=get_fragments_from_section(section)
+    if len(fragms)==1 and isinstance(fragms[0],(Arc,Ellipse)):
+        return False
+    if len(fragms)==1 and isinstance(fragms[0],SplineCurve):
+        return is_polygon_self_intersect(fragms[0].points)
+    lenF=len(fragms)
+    for i in range(lenF):
+        for j in range(lenF):
+            if (j<=i) or (j-i)==1 or (i==0 and j==lenF-1):
+                continue
+            if len(get_intersect_points_of_fragments(fragms[i], fragms[j])) >= 1:
+                # show_points_line([fragms[i].start,fragms[i].end])
+                # show_points_line([fragms[j].start,fragms[j].end])
+                return True
+    return False
+

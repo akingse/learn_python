@@ -411,6 +411,11 @@ def std_tetrahedron(t: float = 100) -> Loft:  # 正四面体 pyramid shape
     geo = scale(t)*trans(-1, -1/sqrt(3))*Loft(sectionA, sectionB)
     return geo
 
+def std_tetra_cube(t: float = 100)->Loft:
+    sectionA = scale(t)*Section(Vec3(0, -1/2), Vec3(1, 0, -1/2), Vec3(1, 0, 1/2))
+    sectionB = scale(t)*Section(Vec3(0, 1/2),Vec3(0, 1/2,-1e-8),Vec3(0, 1/2,1e-8))
+    geo=Loft(sectionA,sectionB)
+    return geo
 
 def std_ring(rOut: float, rSec: float, scope: float = 2*pi) -> Sweep:  # 圆环
     return Sweep(rotx(pi/2)*Section(trans(rOut, 0)*scale(rSec)*Arc()), Line(Arc(scope)))

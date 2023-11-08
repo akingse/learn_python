@@ -52,50 +52,63 @@ def _read_xml_mesh_inter_part(tree):
         create_geometry(trans(-ori)*Sphere(iter,R).colorGreen())
     return (vertexA,vertexB,triangleA,triangleB)
 
-def create_bound_box(min: GeVec3d, max: GeVec3d):
-    create_geometry(trans(min)*scale(max-min)*Cube().colorRed())
-
-def _read_xml_position(tree):
-    size = 1
-    segment = []
-    geo = Combine()
-    for clashresult in tree.getroot().find('batchtest').find('clashtests').find('clashtest').find('clashresults').findall('clashresult'):
-        pos = clashresult.find('clashpoint').find('pos3f')
-        # print([clashobject.find('objectattribute').find('value').text for clashobject in clashresult.find('clashobjects').findall('clashobject')])
-        # print(float(pos.get('x')), float(pos.get('y')), float(pos.get('z')))
-        # cube = trans(-size/2, -size/2, -size/2) * \
-        #     trans(GeVec3d(float(pos.get('x')), float(pos.get('y')),
-        #           float(pos.get('z')))) * scale(size) * Cube()
-        # cube.color(1, 0, 0, 0.3)
-        # geo.append(cube)
-        # segment = [GeVec3d(float(pos.get('xS')), float(pos.get('yS')), float(pos.get('zS'))),
-        #            GeVec3d(float(pos.get('xE')), float(pos.get('yE')), float(pos.get('zE')))]
-        # create_geometry(geo)
-        pointS=pos.get('positionA').split(',')
-        pointE=pos.get('positionB').split(',')
-        pointS=Vec3(float(pointS[0]),float(pointS[1]),float(pointS[2]))
-        pointE=Vec3(float(pointE[0]),float(pointE[1]),float(pointE[2]))
-
-        d = norm(pointS-pointE)
-        if (d > PL_A):
-            print('d =', d)
-        # show_points_line(segment)
-        # create_geometry(trans(pointS)*scale(0.1)*Cube().colorCyan(0.1))
-        geo.append(trans(pointS)*scale(50)*Cube().colorCyan(0.1))
-    # create_geometry(geo)
-
-tree = ET.parse(r'C:\Users\Aking\source\repos\bimbase\src\xml_file\p3d.xml')
-tree = ET.parse(r'C:\Users\Aking\source\repos\bimbase\src\xml_file\test_depth_debug2.xml')
-mesh=_read_xml_mesh_inter_part(tree)
+# 绘制两个Mesh-parts
+# tree = ET.parse(r'C:\Users\Aking\source\repos\bimbase\src\xml_file\p3d.xml')
+tree = ET.parse(r'C:\Users\Aking\source\repos\bimbase\src\xml_file\test_depth_debug.xml')
+# mesh=_read_xml_mesh_inter_part(tree)
 
 trigon=[
     Vec3(-52571.846922390359, 200137.84651690206, 3999.9999999999682),
     Vec3(-52571.846922390359, 200137.84651690206, -300.00000000003018),
     Vec3(-52911.066160852926, 199925.87881120876, 3999.9999999999682),
     ]
-point=mesh[0][0]
+# point=mesh[0][0]
 # create_geometry(Sphere(point,2).colorRed())
 # create_geometry(Section(trigon).colorGreen())
+
+triA=[
+    Vec3(-3104.3029002511553, 203615.26133667614, -1.2996778653295850e-11),
+    Vec3(-3286.9535856740031, 203476.36577477955, -1.2977752206211335e-11),
+    Vec3(-2947.7343472114298, 203688.33348047285, -1.3011058896950091e-11),
+    ]
+triB=[
+    Vec3(-3081.5417249541943, 203579.95860459140, -300.00000000001290),
+    Vec3(-3092.6700295030910, 203597.76761461070, -300.00000000001290),
+    Vec3(-3092.6700295030919, 203597.76761461070, 3999.9999999999854),
+    ]
+# pA=Vec3(-3092.6700295031005,203597.76761461073,-1.2996828194797176e-11)
+# 求交点，精度问题
+triA_0 = Vec3(-55.399210025229877, 412.29143285669988, 8.9812601800076663e-12)
+triA_1 = Vec3(-200.83963971272988, 321.41032934107488, 8.9812601800076663e-12)
+triA_2 = Vec3(127.25166888102012, 551.18694066919988, 8.9812601800076663e-12)
+triB_0 = Vec3(127.25138376062023, 551.18688874390000, 4300.0000000000036)
+triB_1 = Vec3(138.37980172937023, 533.37805085327500, 3.9790393202565610e-12)
+triB_2 = Vec3(127.25138376062023, 551.18688874390000, 3.9790393202565610e-12)
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+
+pI0=Vec3(-9291.4277600683745, 5001.5715320168483, -2.1666632282407113e-12)
+pI1=Vec3(-9288.7473802944405, 4992.2239368782512, -2.1659258382009720e-12)
+bl=isTwoTrianglesIntersectSAT(triA,triB)
+pint=getTwoTrianglesIntersectPoints(triA,triB)
+# create_geometry(scale(1000)*Section(triA).colorRed())
+# create_geometry(scale(1000)*Section(triB).colorGreen())
+# create_geometry(Sphere(pint[0],1).colorBlue())
+# create_geometry(Sphere(pint[1],1).colorBlue())
+
+
+# 分离轴判断两个三角形intrusive
+triA_0 = Vec3(0,0)
+triA_1 = Vec3(10,0)
+triA_2 = Vec3(10,10)
+triB_0 = Vec3(8,0,-1)
+triB_1 = Vec3(8,10,-1)
+triB_2 = Vec3(8,0,10)
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+# create_geometry(scale(10)*Section(triA).colorRed())
+# create_geometry(scale(10)*Section(triB).colorGreen())
+relation=getRelationOfTwoTrianglesSAT(triA,triB)
 
 exit()
 # ------------------------------------------------------------------------------------

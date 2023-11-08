@@ -3,3 +3,5 @@ pyp3d/copyinto
 my_work
 *.pyc
 pyp3d/vDebug.zip
+*.json
+

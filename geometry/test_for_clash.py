@@ -3,6 +3,30 @@ import os
 mypath = 'D:/Alluser/learn_python'  # fixed path
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
+
+# for test depth 侵入距离测试专用
+cube1=scale(300,200,100)*Cube()
+cube2=trans(-10,-20,-30)*scale(100)*Cube()
+# create_geometry(cube1)
+# create_geometry(cube2)
+mat=trans(0,500)*rotate_arbitrary(Vec3(),Vec3(1,1),pi/3)
+mat=trans(500,500)*rotate_arbitrary(Vec3(),Vec3(1,1),pi/3)
+# create_geometry(trans(500,0)*cube1)
+# create_geometry(trans(500,0)*cube2)
+# create_geometry(mat*cube1)
+# create_geometry(mat*cube2)
+
+cone1=Cone(Vec3(),Vec3(0,0,100),100,100)
+cone2=trans(100,0,50)*Cone(Vec3(0,0),Vec3(0,0,200),50,50)
+d=2500
+# mat=trans(d,0)
+# create_geometry(mat*cone1)
+# create_geometry(mat*cone2)
+# mat=trans(d,500)*rotate_arbitrary(Vec3(),Vec3(1,1),pi/3)
+# create_geometry(mat*cone1)
+# create_geometry(mat*cone2)
+
+exit()
 J2=sqrt(2)
 J3=sqrt(3)
 testCase = 'Overlap(cube-cube)' #相交

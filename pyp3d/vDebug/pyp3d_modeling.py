@@ -134,7 +134,6 @@ def sweep_parallel_polyline(pStart:GeVec3d,polyline: list) -> list:
     paraList.append(pLast)
     return paraList
 
-
 # 获取直线扫掠截面列表
 def create_middle_discrete_sections(sec: Section, points: list, isClose=False) -> list:
     # middle function, all preconditions are met. point in polygon, open path.

@@ -93,8 +93,8 @@ def _use_rand_create3(show=False):
     return countOut
 
 
-if __name__=='__main__':
-    countOut=0
+# if __name__=='__main__':
+#     countOut=0
     # for i in range(1000000): #100000
     #     countOut+=_use_rand_create3()
     # print('countOut=',countOut)
@@ -112,10 +112,23 @@ triB = [triB_0, triB_1, triB_2]
 # create_geometry(Section(triA).colorBlue())
 # create_geometry(Section(triB).colorGreen())
 
+arc_of_center_points
+a=get_intersect_point_of_line_arc(Segment(Vec3(-10, 0),Vec3(0, 10)),scale(1)*Arc())
+
+# 绘制五角星
+lineList1=[100, 50, 10, 79, 65, 2, 65, 98, 10, 21]
+lineList2=[98, 63, 4, 68, 77, 8, 52, 100, 19, 12]
+linePnts1=[]
+linePnts2=[]
+for i in range(5):
+    linePnts1.append(Vec3(lineList1[2*i],lineList1[2*i+1]))
+    linePnts2.append(Vec3(lineList2[2*i],lineList2[2*i+1]))
+create_geometry(Section(linePnts1))
+create_geometry(Section(linePnts2))
+
+is_parallel
 res=isTwoTrianglesIntersectSAT(triA,triB)
-a=Vec3(4929001.73, -378741.05, 0.00
-)
-b=Vec3(4928984.49,-378757.96, 0.00
-)
+a=Vec3(4929001.73, -378741.05, 0.00)
+b=Vec3(4928984.49,-378757.96, 0.00)
 print((a-b).norm())
 print('return 0')

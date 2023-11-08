@@ -523,7 +523,7 @@ class GeVec3d(BufferStackBase):
         return self.unitize()
     def isOrigin(self):
         return self.norm() < PL_A
-    def isZero(self, eps=1e-14)->bool:
+    def isZero(self, eps=1e-8)->bool:
         # return self.isOrigin()
         return fabs(self.x)<eps and fabs(self.y)<eps and fabs(self.z)<eps
     def isValid(self):

@@ -337,6 +337,8 @@ def get_intersect_point_of_line_arc(line: Segment, arc: Arc, isLine=False, isCir
     # line on arc plane
     invM = inverse(forwM)  # get the unit arc
     lineA = invM*line
+    if (1.0 < get_distance_of_point_line(GeVec3d(0,0),lineA)):
+        return []
     theta = get_angle_of_two_vectors(g_axisX, lineA.vectorU)
     lineR = rotz(-theta)*lineA
     py = lineR.start.y  # transfer to horizontal line

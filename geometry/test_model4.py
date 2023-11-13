@@ -112,7 +112,6 @@ triB = [triB_0, triB_1, triB_2]
 # create_geometry(Section(triA).colorBlue())
 # create_geometry(Section(triB).colorGreen())
 
-arc_of_center_points
 a=get_intersect_point_of_line_arc(Segment(Vec3(-10, 0),Vec3(0, 10)),scale(1)*Arc())
 
 # 绘制五角星
@@ -126,7 +125,6 @@ for i in range(5):
 create_geometry(Section(linePnts1))
 create_geometry(Section(linePnts2))
 
-is_parallel
 res=isTwoTrianglesIntersectSAT(triA,triB)
 a=Vec3(4929001.73, -378741.05, 0.00)
 b=Vec3(4928984.49,-378757.96, 0.00)

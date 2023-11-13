@@ -779,3 +779,82 @@ def getTwoTrianglesIntersectPoints(triA, triB):
             if count == 2:
                 return res
     return res
+
+
+def line_segment_aabb_intersect(segment:Segment, aabb):
+    # Calculate the AABB's corner points
+    start=segment.start
+    end=segment.end
+    vecBox=aabb[1]-aabb[0]
+    corners = trans(aabb[0])*[ #aabb.get_corners()
+        Vec3(0,0,0),
+        Vec3(vecBox.x,0,0),
+        Vec3(vecBox.x,vecBox.y,0),
+        Vec3(0,vecBox.y,0),
+        Vec3(0,0,vecBox.z),
+        Vec3(vecBox.x,0,vecBox.z),
+        vecBox, 
+        Vec3(0,vecBox.y,vecBox.z),
+    ]
+
+    # Calculate the line segment's direction vector
+    dir = end - start
+
+    # Project the AABB's corner points and the line segment's endpoints onto the line segment's direction vector
+    min_proj = math.inf
+    max_proj = -math.inf
+    for corner in corners:
+        proj = corner.dot(dir)
+        min_proj = min(min_proj, proj)
+        max_proj = max(max_proj, proj)
+
+    start_proj = start.dot(dir)
+    end_proj = end.dot(dir)
+    min_proj = min(min_proj, min(start_proj, end_proj))
+    max_proj = max(max_proj, max(start_proj, end_proj))
+
+    # Check if the minimum and maximum values overlap with the line segment's length
+    segment_length = (end - start).norm()
+    return max_proj >= 0 and min_proj <= segment_length and max_proj - min_proj <= segment_length
+
+def isSegmentAndBoundingBoxIntersectSAT(segment:Segment, aabb):
+    vecSeg = segment.end - segment.start
+    vecBox=aabb[1]-aabb[0]
+    corners = [ #aabb.get_corners()
+        Vec3(0,0,0),
+        Vec3(vecBox.x,0,0),
+        Vec3(vecBox.x,vecBox.y,0),
+        Vec3(0,vecBox.y,0),
+        Vec3(0,0,vecBox.z),
+        Vec3(vecBox.x,0,vecBox.z),
+        vecBox, 
+        Vec3(0,vecBox.y,vecBox.z),
+    ]
+    axes = [
+            vecSeg,
+            Vec3(1,0,0),
+            Vec3(0,1,0),
+            Vec3(0,0,1),
+            vecSeg.cross(Vec3(1,0,0)),
+            vecSeg.cross(Vec3(0,1,0)),
+            vecSeg.cross(Vec3(0,0,1)),
+            ]   
+
+    for axis in axes:
+        minA = DBL_MAX
+        maxA = -DBL_MAX
+        minB = DBL_MAX
+        maxB = -DBL_MAX
+        for vertex in corners:
+            projection = (vertex).dot(axis)
+            minA = min(minA, projection)
+            maxA = max(maxA, projection)
+        for vertex in [segment.start-aabb[0],segment.end -aabb[0] ]:
+            projection = vertex.dot(axis)
+            minB = min(minB, projection)
+            maxB = max(maxB, projection)
+        if maxA < minB or maxB < minA:
+            # if maxA + eps < minB or maxB + eps < minA:
+            return False
+    return True
+

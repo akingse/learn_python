@@ -66,6 +66,19 @@ A0 = Vec3(-986.90,-3035.80,0.00)
 A1 = Vec3(-1876.85,-2315.13 , 0.00)
 d=(A0-A1).norm()
 
+res1=line_segment_aabb_intersect(Segment(Vec3(0.5,0.5),Vec3(1,1,1)),[Vec3(0,0),Vec3(1,1,1)])
+res2=isSegmentAndBoundingBoxIntersectSAT(Segment(Vec3(0.5,0.5),Vec3(1,1,1)),[Vec3(0,0),Vec3(1,1,1)])
+
+# 创建随机box，测试edge相交
+rg = 1000
+rs=100
+posi=GeVec3d(randint(0, rg), randint(0, rg), randint(0, rg))
+cbsz=GeVec3d(randint(0, rs), randint(0, rs), randint(0, rs))
+box1=trans(posi)*scale(cbsz.x,cbsz.y,cbsz.z)*Cube()
+box2=trans(posi)*scale(-cbsz.x,cbsz.z,cbsz.y)*Cube() #反向cube，生成的polycece不同
+create_geometry(box1.colorBlue())
+create_geometry(box2.colorGreen())
+
 exit()
 # 测试三角形与包围盒相交
 # res=isTriangleBoundingBoxIntersect(trigon, [Vec3(100,100,100),Vec3(700,600,500)])

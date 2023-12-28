@@ -75,9 +75,27 @@ rs=100
 posi=GeVec3d(randint(0, rg), randint(0, rg), randint(0, rg))
 cbsz=GeVec3d(randint(0, rs), randint(0, rs), randint(0, rs))
 box1=trans(posi)*scale(cbsz.x,cbsz.y,cbsz.z)*Cube()
-box2=trans(posi)*scale(-cbsz.x,cbsz.z,cbsz.y)*Cube() #反向cube，生成的polycece不同
-create_geometry(box1.colorBlue())
-create_geometry(box2.colorGreen())
+# box2=trans(posi)*scale(-cbsz.x,cbsz.z,cbsz.y)*Cube() #反向cube，生成的polycece不同
+box2=trans(posi)*trans(-cbsz.x)*scale(cbsz.x,cbsz.z,cbsz.y)*Cube()
+
+box1=scale(1000)*Cube()
+# box2=transx(-200)*scale(200)*Cube()
+# create_geometry(box1.colorBlue())
+# create_geometry(box2.colorGreen())
+for i in range(1000):
+    # posi=GeVec3d(randint(0, rg), randint(0, rg), randint(0, rg))
+    cbsz=GeVec3d(randint(0, rs), randint(0, rs), randint(0, rs))
+    box1=trans(posi)*scale(cbsz)*Cube()
+    # create_geometry(box1.colorGreen())
+
+# 测试kdtree
+N=2
+# for i in range(N):
+#     for j in range(N):
+#         for k in range(N):
+#             create_geometry(trans(100/N*i,100/N*j,100/N*k)*scale(10)*Cube())
+create_geometry(scale(20)*Cube().colorGreen())
+
 
 exit()
 # 测试三角形与包围盒相交

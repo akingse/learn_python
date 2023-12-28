@@ -122,11 +122,47 @@ linePnts2=[]
 for i in range(5):
     linePnts1.append(Vec3(lineList1[2*i],lineList1[2*i+1]))
     linePnts2.append(Vec3(lineList2[2*i],lineList2[2*i+1]))
-create_geometry(Section(linePnts1))
-create_geometry(Section(linePnts2))
+# create_geometry(Section(linePnts1))
+# create_geometry(Section(linePnts2))
 
 res=isTwoTrianglesIntersectSAT(triA,triB)
 a=Vec3(4929001.73, -378741.05, 0.00)
 b=Vec3(4928984.49,-378757.96, 0.00)
 print((a-b).norm())
+
+# 数据过大
+pointC=Vec3(509286656.03, 4458021865.35, 0.00)
+k=1e10
+point0=pointC+Vec3(k,0)
+point1=pointC+Vec3(0,k)
+arc=arc_of_center_points(pointC,point0,point1)
+# create_geometry(arc)
+
+get_intersect_point_of_two_lines
+sweep_stere
 print('return 0')
+
+segm=Segment(Vec3(),Vec3())
+k=3.14
+point=segm.start+k*segm.vectorU
+
+# cube1=scale(100,100,200)*Cube()
+cube1=trans(-50)*Swept(Section(Vec3(-0,0),Vec3(100,0),Vec3(100,100),Vec3(0,100),),Vec3(-0,0,200))
+cube2=trans(-100,-1e-6)*scale(100,100,200)*Cube()
+cube3=trans(-100,-0)*scale(100,100,200)*Cube()
+# create_geometry(cube1+trans(0,100)*Sphere(Vec3(-0,0),100))
+
+cube1=scale(10000,100,100)*Cube()
+prism=trans(100,-1e-3,-100)*Swept(Section(Vec3(-0,0),Vec3(5,10),Vec3(-5,10),),Vec3(0,0,1000))
+create_geometry(cube1-prism)
+
+sec=Section()
+segm=Segment()
+normal=get_matrixs_axisz(sec.transformation)
+segmVec2=to_vec2(to_vec2(segm.vector))
+mat=rotate_arbitrary(segm.start,cross(segm.vector,g_axisZ),get_angle_of_two_vectors(segmVec2,segm.vector))*\
+    rotate_arbitrary(segm.start,g_axisZ,get_angle_of_two_vectors(normal,segmVec2))
+
+is_point_in_polygon
+shadow_scale_matrix
+

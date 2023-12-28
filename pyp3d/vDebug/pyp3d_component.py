@@ -1552,7 +1552,7 @@ class Sweep(Primitives):  # 单截面沿曲线路径扫掠造型
 
 
 class Segment(Primitives):  # 线段类（几何计算专用）
-    def __init__(self, pointStart, pointEnd):
+    def __init__(self, pointStart=GeVec3d(), pointEnd=GeVec3d(1,0,0)):
         Primitives.__init__(self)
         if (not isinstance(pointStart, (GeVec2d, GeVec3d))) or (not isinstance(pointEnd, (GeVec2d, GeVec3d))):
             raise TypeError('Segment parameter error!')

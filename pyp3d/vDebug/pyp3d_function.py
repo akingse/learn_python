@@ -47,7 +47,7 @@ def arc_of_three_points(*args) -> Arc:
 def arc_of_center_points(centerP: GeVec3d, startP: GeVec3d, endP: GeVec3d, isCcw=True) -> Arc:
     R1 = norm(startP-centerP)
     R2 = norm(endP-centerP)
-    if abs(R1-R2) > PL_A or is_float_zero(R1):
+    if abs(R1-R2) > R1*PL_A or is_float_zero(R1):
         raise TypeError('not a circle arc!')
     if norm(startP-endP) < PL_A:
         return trans(centerP)*scale(R1)*Arc()  # return a full arc that ccw.

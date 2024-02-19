@@ -110,5 +110,116 @@ print(res)
 normal = (trigon[1] - trigon[0]).cross(trigon[2] - trigon[0])
 res=normal.z*normal.dot(point-trigon[0])
 
-print('return 0')
+# 点在三角形内部
+trion=[
+    Vec2(-1,-1),
+    Vec2(100,1),
+    Vec2(1,-1),
+]
 
+# trion.reverse()
+point=Vec2(0.1,0.1)
+a=(trion[1]-trion[0]).dot(point-trion[0])
+b=(trion[2]-trion[1]).dot(point-trion[1])
+c=(trion[0]-trion[2]).dot(point-trion[2])
+
+
+v1=Vec3(100,0)
+v2=Vec3(100,0.001)
+angle1=v1.cross(v2).z/v1.norm()/v2.norm()
+angle2=v1.cross(-v2).z/v1.norm()/v2.norm()
+
+def _getToleAngle(v1,v2):
+    cr=abs(v1.cross(v2).z)
+    angle=abs(v1.cross(v2).z)/v1.norm()/v2.norm()
+    inTole=angle<pi/180
+    return inTole
+
+
+vec1=Vec3(54799.999999985812, 16875.000000000000)
+vec2=Vec3(54799.999999986409, 17275.000000000000)
+vec3=Vec3(54799.999999985812, 17275.000000000000)
+vec1=Vec3(-669.69638095000005, 6424.8829120299997)
+vec2=Vec3(-669.69638095000005, 6424.8829115999997)
+vec3=Vec3(-669.11337667999999, 6400.0000000000000)
+
+vec=Vec3(23824.999998520001, 7113.2352941800000)
+vec=Vec3(23824.999998510000, 7113.2352941899999)
+vec=Vec3(23824.999998510000, 7100.0000000000000)
+vec=Vec3(23824.999998520001, 7100.0000000000000)
+
+# 顺序问题
+vec1=Vec3(53.438467760000002, 26.436471539999999)
+vec2=Vec3(58.132393220000004, 64.754230460000002)
+vec3=Vec3(56.465085870000003, 72.257113540000006)
+area=3933.471977,3937486
+area=3933.471977,9833390
+
+vec1=Vec3(534384.67763689999, 264364.71540329000)
+vec2=Vec3(581323.93231264001, 647542.30459307006)
+vec3=Vec3(564650.85875416000, 722571.13560624002)
+
+
+# _getToleAngle(vec3-vec2,vec2-vec1)
+vecB1=Vec3(101.96152422706632, -7.5364438016821212e-15)
+vecB2=Vec3(50.000000000000000, 49.497474683058314)
+# vec3=Vec3(50.000000000000000, -21.213203435596430)
+# {101.96152422706632, 70.710678118654727} 
+vec1=Vec3(101.96152423000001, 0.0000000000000000)
+vec2=Vec3(74.361846459999995, 26.290882939999999)
+# 逐次布尔减，由于精度问题，会出现回头线
+{74.361846459999995, 26.290882939999999}
+{74.361846470000003, 26.290882939999999}
+DBL_MAX
+j=(vecB2-vecB1).cross(vec2-vecB1)
+
+# create_geometry(scale(100)*Sphere())
+# create_geometry(trans(200,0)*scale(100)*Cube())
+
+# bug测试
+# 面积异常
+triA_1 = Vec3(10.0, 10.0, 0)
+triA_0 = Vec3(10.0, -10.0, 0)
+triA_2 = Vec3(0.0, 0.0, -0)
+trigon = ( triA_0, triA_1, triA_2 )
+triA_1=Vec2(-349.99999999999955, 14250.000000000000)
+triA_0=Vec2(-349.99999999978263, 17750.000000000000)
+triA_2=Vec2(-350.00000000000000, 17750.000000000000)
+
+polygon=[
+Vec2(6520.36200001, 2006.3344400000),
+Vec2(6520.36200001, 2006.3344600001),
+Vec2(6110.67149999, 3890.9107100001),
+Vec2(6110.67149999, 3890.9106900001),]
+# create_geometry(Section(polygon))
+# show_points_line(polygon)
+
+
+# 生成遮挡模型
+sec1=scale(10)*Section(Arc())
+sec2=rectangle_diagonal(Vec3(),Vec3(20,20))
+fusion=sec2-sec1
+# create_geometry(trans(-10,0)*fusion)
+
+
+
+box1=trans(20,-20,20)*scale(20)*Cube()#遮挡成环
+# create_geometry(box1)
+
+box2=trans(150,-20,30)*scale(150,20,60)*Cube() #遮挡box
+box2=trans(180,-50,50)*scale(150,100,20)*Cube() #互相遮挡
+# create_geometry(box2)
+
+
+mesh1=scale(100)*Cube()-trans(50,50)*scale(100)*Cube()
+mesh2=trans(50,0)*scale(100)*Cube()-trans(0,50)*scale(100)*Cube()
+# create_geometry(mesh1)
+# create_geometry(mesh2)
+
+# create_geometry(Line(Vec2(55,80),Vec2(93,127)))
+# create_geometry(Line(Vec2(39,96),Vec2(141,163)))
+
+
+
+sweep_stere
+print('return 0')

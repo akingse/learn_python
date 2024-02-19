@@ -116,7 +116,7 @@ def _sweep_parallel(sec: Section, line: Line):
     paraList.append(pEnd)
     # show_points_line(paraList)
     geo = sweep_stere(sec, Line(paraList))
-    # create_geometry(geo.colorRed())
+    create_geometry(geo.colorRed())
     return geo
 
 
@@ -130,18 +130,22 @@ p = Vec3(-100, 0,  100)
 # l0 = get_distance_of_point_line(p, Segment(line[0], line[1]))
 # l1 = get_distance(line[0], line[1], p)
 
-line = Line(line)
+line = Line(to_vec2(line))
 sec = Section(Vec3(), Vec3(50, 0), Vec3(50, 50), Vec3(0, 50))
 sec2 = transy(-150)*roty(-pi/2)*Section(Vec3(), Vec3(100, 0), Vec3(100,50, ), Vec3(0, 50,))
 sec1 = transy(-100)*roty(-pi/2)*sec
 sec0 = transy(-200)*roty(-pi/2)*sec
-# _sweep_parallel(sec0, line)
+
+create_geometry(line)
+create_geometry(sec0)
+
+_sweep_parallel(sec0, line)
 # _sweep_parallel(sec1, line)
 # _sweep_parallel(sec2, line)
 
 sec0 = transy(-50)*roty(-pi/2)*sec
 sec0=roty(pi/2)*Section(five_points_star(30))
-create_geometry(sweep_stere(sec0, line))
+# create_geometry(sweep_stere(sec0, line))
 exit(0)
 
 is_two_sections_intersect

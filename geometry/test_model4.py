@@ -138,8 +138,6 @@ point1=pointC+Vec3(0,k)
 arc=arc_of_center_points(pointC,point0,point1)
 # create_geometry(arc)
 
-get_intersect_point_of_two_lines
-sweep_stere
 print('return 0')
 
 segm=Segment(Vec3(),Vec3())
@@ -154,7 +152,7 @@ cube3=trans(-100,-0)*scale(100,100,200)*Cube()
 
 cube1=scale(10000,100,100)*Cube()
 prism=trans(100,-1e-3,-100)*Swept(Section(Vec3(-0,0),Vec3(5,10),Vec3(-5,10),),Vec3(0,0,1000))
-create_geometry(cube1-prism)
+# create_geometry(cube1-prism)
 
 sec=Section()
 segm=Segment()
@@ -163,6 +161,62 @@ segmVec2=to_vec2(to_vec2(segm.vector))
 mat=rotate_arbitrary(segm.start,cross(segm.vector,g_axisZ),get_angle_of_two_vectors(segmVec2,segm.vector))*\
     rotate_arbitrary(segm.start,g_axisZ,get_angle_of_two_vectors(normal,segmVec2))
 
-is_point_in_polygon
-shadow_scale_matrix
+
+# 测试线段求交
+get_intersect_point_of_two_lines
+
+def getIntersectPoint(A1:GeVec2d,A2:GeVec2d,B1:GeVec2d,B2:GeVec2d):
+# k = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) /
+    # ((x4 - x3) * (y2 - y1) - (y4 - y3) * (x2 - x1))
+# P = A1 + k * (A2-A1)
+    k=-((B2.x-B1.x) * (A1.y - B1.y) - (B2.y - B1.y) * (A1.x-B1.x))/ ((B2.x-B1.x) * (A2.y - A1.y) - (B2.y - B1.y) * (A2.x-A1.x)) #not parallel
+    return A1 + k * (A2-A1)
+
+line1=[Vec2(),Vec2(200,30),]
+line2=[Vec2(200,-100),Vec2(0,100),]
+# create_geometry(Line(line1))
+# create_geometry(Line(line2))
+# point=getIntersectPoint(line1[0],line1[1],line2[1],line2[0])
+# create_geometry(Sphere(point,10))
+
+
+# 统一函数调用C++函数
+def projectionPolyface(i: int):  # 在全局坐标系的原点创建一个几何体
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyface")(i)
+# def projectionPolyface1(i: int,show:bool=False):  # 在全局坐标系的原点创建一个几何体
+#     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyface1")(i,show)
+
+# projectionPolyface(-1) #仅遮挡算法验证show
+# projectionPolyface(-1,true) 
+# projectionPolyface(1) 
+
+# for i in range(16):
+#     projectionPolyface(i)
+#     time.sleep(1)
+
+
+def GenerateProfileArea(i: int,drawProfle:bool):  # 在全局坐标系的原点创建一个几何体
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileArea")(i,drawProfle)
+
+def GenerateProfileDraw(i: int):  # 在全局坐标系的原点创建一个几何体
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileDraw")(i)
+
+# GenerateProfileDraw(148)
+GenerateProfileDraw(151)
+
+# GenerateProfileArea(3138,false)#小误差
+# GenerateProfileArea(6138) #area = 56390.607480704784
+
+# suing 11101
+# GenerateProfileArea(7581) # 0.067001
+# GenerateProfileArea(7582) #0.053695
+# GenerateProfileArea(7581,true) #方框
+# GenerateProfileArea(9314,false)
+
+# using 27006
+# GenerateProfileArea(5603,true) #三角面方向问题
+# GenerateProfileArea(8819,true)
+# GenerateProfileArea(5602,true)
+# GenerateProfileArea(104,false) 
+
 

@@ -21,7 +21,7 @@ if (tcase == 1):
     create_geometry(rotz(pi/16)*trans(200, 0)*geo1)
     create_geometry(rotz(pi/16)*trans(200, 0)*geo2)
 
-    geo1 = Sweep(Section(scale(100)*Arc())-Section(scale(50)
+    geo1 = Swept(Section(scale(100)*Arc())-Section(scale(50)
                  * Arc()), Line(Vec3(0, 0), Vec3(0, 0, 100)))
     geo2 = Extrusion([Vec3(100, 100), Vec3(-100, 100),
                       Vec3(-100, -100), Vec3(100, -100)], Vec3(0, 0, 100))

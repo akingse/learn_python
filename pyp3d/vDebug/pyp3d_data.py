@@ -602,7 +602,9 @@ class GeVec2d(BufferStackBase):
             return GeVec3d(a.x-self.x, a.y-self.y, a.z)
         else:
             raise TypeError('improper parameter!')
-
+    def dot(self,val)->float:
+        return self.x*val.x + self.y*val.y
+    
     def _push_to(self, buf: BufferStack): buf.push(self.x, self.y)
     def _pop_from(
         self, buf: BufferStack): self.y, self.x = buf.pop(), buf.pop()

@@ -1,4 +1,3 @@
-import numpy as np
 from math import *
 import sys
 import os
@@ -147,10 +146,6 @@ sw = scale(10)*Sweep(Section(Vec3(0, 0), Vec3(2, 0), Vec3(2, 1),
 
 # 改bug
 # total="4074" riangularIntersectC="114014424"
-
-is_two_line_intersect
-get_distance_of_point_line
-get_distance_of_point_plane
 
 # data load finish, cost time = 3.178s
 TriangularIntersectC = 44420000

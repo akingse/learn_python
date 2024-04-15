@@ -112,6 +112,53 @@ triB = [triB_0, triB_1, triB_2]
 # create_geometry(Section(triA).colorBlue())
 # create_geometry(Section(triB).colorGreen())
 
+# frontJudge=unknown
+triA_0 = Vec3(23468.498630128768, 1175.0000000000314)
+triA_1 = Vec3(23468.332590574166, 1174.8885062053728)
+triA_2 = Vec3(22679.498630968690, 2350.0000000000314)
+triB_0 = Vec3(22679.332591414077, 0.11149379469016216)
+triB_1 = Vec3(22679.332586799897, 0.11149379469016220)
+triB_2 = Vec3(23468.332590574166, 1175.1114937946900)
+
+triA_0 = Vec3(14349.686098574532, 1538.0602337443577)
+triA_1 = Vec3(14353.208593637890, 1540.1473343189646)
+triA_2 = Vec3(14353.208593637890, 0.0000000000000000)
+
+
+triA = [triA_0, triA_1, triA_2]
+triB = [triB_0, triB_1, triB_2]
+areaA=(triA[1]-triA[0]).cross(triA[2]-triA[1])
+areaB=(triB[1]-triB[0]).cross(triB[2]-triB[1])
+# create_geometry(Section(triA))
+
+count_tri_degene_area=0
+_max=0
+for i in range(3):
+    i1=i+1 if (i+1<3) else (i+1)%3
+    i2=i+2 if (i+2<3) else (i+2)%3
+    vecA=triA[i1]-triA[i]
+    vecB=triA[i2]-triA[i1]
+    eps=0.03
+    _max=max(vecA.norm(),_max)
+    theta=vecA.cross(vecB).norm() / (vecA.norm() * vecB.norm())
+    if (vecA.cross(vecB).norm() < eps/_max * vecA.norm() * vecB.norm()):
+        count_tri_degene_area+=1
+
+
+# toleAngle
+# segmVecA=triB[1]-triB[0]
+segmVecA=triB[2]-triB[0]
+segmVecB=triB[2]-triB[1]
+agnle=segmVecA.cross(segmVecB).norm()/(segmVecA.norm() * segmVecB.norm())<eps
+d1=eps*segmVecA.norm() * segmVecB.norm()
+d2=segmVecA.cross(segmVecB).norm()
+if (segmVecA.cross(segmVecB).norm()<eps * segmVecA.norm() * segmVecB.norm()):
+    print()
+area1=(triB[1]-triB[0]).cross(triB[2]-triB[0]) #面积一致
+area2=(triB[1]-triB[0]).cross(triB[2]-triB[1])
+area3=(triB[2]-triB[0]).cross(triB[2]-triB[1])
+
+toleA=pi/1080
 a=get_intersect_point_of_line_arc(Segment(Vec3(-10, 0),Vec3(0, 10)),scale(1)*Arc())
 
 # 绘制五角星
@@ -163,7 +210,6 @@ mat=rotate_arbitrary(segm.start,cross(segm.vector,g_axisZ),get_angle_of_two_vect
 
 
 # 测试线段求交
-get_intersect_point_of_two_lines
 
 def getIntersectPoint(A1:GeVec2d,A2:GeVec2d,B1:GeVec2d,B2:GeVec2d):
 # k = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) /
@@ -178,45 +224,4 @@ line2=[Vec2(200,-100),Vec2(0,100),]
 # create_geometry(Line(line2))
 # point=getIntersectPoint(line1[0],line1[1],line2[1],line2[0])
 # create_geometry(Sphere(point,10))
-
-
-# 统一函数调用C++函数
-def projectionPolyface(i: int):  # 在全局坐标系的原点创建一个几何体
-    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyface")(i)
-# def projectionPolyface1(i: int,show:bool=False):  # 在全局坐标系的原点创建一个几何体
-#     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyface1")(i,show)
-
-# projectionPolyface(-1) #仅遮挡算法验证show
-# projectionPolyface(-1,true) 
-# projectionPolyface(1) 
-
-# for i in range(16):
-#     projectionPolyface(i)
-#     time.sleep(1)
-
-
-def GenerateProfileArea(i: int,drawProfle:bool):  # 在全局坐标系的原点创建一个几何体
-    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileArea")(i,drawProfle)
-
-def GenerateProfileDraw(i: int):  # 在全局坐标系的原点创建一个几何体
-    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileDraw")(i)
-
-# GenerateProfileDraw(148)
-GenerateProfileDraw(151)
-
-# GenerateProfileArea(3138,false)#小误差
-# GenerateProfileArea(6138) #area = 56390.607480704784
-
-# suing 11101
-# GenerateProfileArea(7581) # 0.067001
-# GenerateProfileArea(7582) #0.053695
-# GenerateProfileArea(7581,true) #方框
-# GenerateProfileArea(9314,false)
-
-# using 27006
-# GenerateProfileArea(5603,true) #三角面方向问题
-# GenerateProfileArea(8819,true)
-# GenerateProfileArea(5602,true)
-# GenerateProfileArea(104,false) 
-
 

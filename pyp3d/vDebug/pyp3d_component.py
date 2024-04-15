@@ -1417,7 +1417,7 @@ class ParametricEquation(Primitives):  # Parametric Equation
 
 
 class Polyface(Primitives):  # 三角面片
-    def __init__(self, filePath):
+    def __init__(self, filePath=''):
         Primitives.__init__(self)
         self.representation = 'Polyface'
         self.extractGraphics = UnifiedFunction(

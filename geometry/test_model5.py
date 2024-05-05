@@ -43,7 +43,7 @@ a=DBL_MAX
 point = rotz(pi/3)*Vec3(1.1, 1.2, -1)
 trigon = rotz(pi/3)*[Vec3(0, 0), Vec3(2.2, 2.4)]
 cp = (point - trigon[1]).cross(point - trigon[0])
-
+get_intersect_line_of_two_planes
 
 # cross
 vec1=Vec3(-1,0,0)
@@ -54,7 +54,7 @@ cp1=vec1.cross(vecR)
 cp2=vec1.cross(vec2)
 cp3=vecR.cross(vec2)
 
-
+inverse
 # 测试交点精度
 triA_0 = Vec3(10,10,0+random())
 triA_1 = Vec3(10, -10, 0+random())

@@ -15,12 +15,34 @@ def projectionPolyface(i: int):  # 在全局坐标系的原点创建一个几何
 
 # projectionPolyface(-1) #仅遮挡算法验证show
 # projectionPolyface(-1,true) 
-# projectionPolyface(1) 
+# projectionPolyface(0) 
 
 # for i in range(16):
 #     projectionPolyface(i)
 #     time.sleep(1)
 
+# 叠合墙
+# 4
+(2449.9994316467855, 9.0605955894276317e-30)
+(-7.9194050944770308e-05, 3000.0000000000000)
+(-7.9194050944770308e-05, 8.9908177180674210e-30)
+# 0
+(2449.9995108408330, 6.9777871361847811e-32)
+(1.1368683772161603e-13, 3000.0000000000000)
+(1.1368683772161603e-13, -3.9193634994574551e-58)
+
+# 5
+(2449.9994316467855, 9.0605955894276317e-30)
+(-7.9194050944770308e-05, 3000.0000000000000)
+(-7.9194050944770308e-05, 8.9908177180674210e-30)
+
+(-7.9194052955576326e-05, 3000.0000000000000)#5
+(-7.9194052955576326e-05, 3000.0000000000000)
+
+triA1=(2449.9994316467855, 0.0000000000000000)
+triA0=(-7.9194050954356499e-05, 3000.0000000000000)
+maxB = 7349998.5325225042
+minA = 7349998.2949403506
 
 def GenerateProfileArea(i: int,drawProfle:bool):  # 在全局坐标系的原点创建一个几何体
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileArea")(i,drawProfle)
@@ -31,26 +53,35 @@ def GenerateProfileDraw(i: int):  # 在全局坐标系的原点创建一个几�
 # GenerateProfileDraw(148)
 # GenerateProfileDraw(151)
 
-def GenerateProfileTrigon(i: int):  
+def GenerateProfileTrigon(i: int):  #绘制布尔Diff后的三角面
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "GenerateProfileTrigon")(i)
 
 # GenerateProfileTrigon(17)
-GenerateProfileTrigon(0)
+# GenerateProfileTrigon(0)
 # GenerateProfileTrigon(-1)
 
 def testClipperFeatrueFunction(i: int):  # mdp精度对clipper的影响
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "testClipperFeatrueFunction")(i)
 
-# 两共线三角面，mdp=8x，mdp=6x，mdp=7v
-# testClipperFeatrueFunction(8) # max=14
 
-def GenerateProfileDebug(i: int):  
+def GenerateProfileDebug(i: int):  #绘制指定三角面
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyfaceToGenerateProfileD")(i)
 
-# GenerateProfileDebug(8)
+GenerateProfileTrigon(4)
+# GenerateProfileTrigon(11)
+# projectionPolyface(114)
 
 (-8447.6939391699998, 1504.5572337500000)
 (-8447.6939391699998, 1504.5572337400001)
+# 114
+# (-2213.8008594307971, 1946.9897900040326)
+# (-2193.2739612807973, 1926.7766952940324)
+(-1919.1719573007972, 1868.7277368040325)
+
+(-1926.6945369,507971, 1883.2844434,640324) #114
+(-1926.6945369,621455, 1883.2844434,700000) #115
+(-2206.4174202,107970, 1953.257155,2840325) #114
+(-2206.4174202,221457, 1953.257155,3000000) #115
 
 # 16-17
 # triangle
@@ -74,7 +105,7 @@ def GenerateProfileDebug(i: int):
 ( 3680285322,-19242782915)
 (13274767281,-69356501865)
 
-
+is_polygon_self_intersect
 # GenerateProfileArea(3138,false)#小误差
 # GenerateProfileArea(6138) #area = 56390.607480704784
 

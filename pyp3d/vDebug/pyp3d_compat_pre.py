@@ -31,7 +31,6 @@ def to_section(*args) -> Section:  # 多点(>=3)生成一个二维Section面，�
 
 
 def get_matrix_from_contourline(contourLines):  # 从一个轮廓线中提取一个参考矩阵S
-    # BPTransform getLocalMatrixFromCurveArray(GeCurveArrayPtr curveArray3)
     for iter in contourLines:
         if isinstance(iter, Arc):
             return get_orthogonal_matrix(iter.transformation)

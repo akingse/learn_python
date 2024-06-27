@@ -67,9 +67,22 @@ def testClipperFeatrueFunction(i: int):  # mdp精度对clipper的影响
 def GenerateProfileDebug(i: int):  #绘制指定三角面
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyfaceToGenerateProfileD")(i)
 
-GenerateProfileTrigon(4)
+# GenerateProfileTrigon(4)
 # GenerateProfileTrigon(11)
 # projectionPolyface(114)
+
+# 网格法过滤
+def projectionPolyfaceToMakeFilterD(i: int):  #绘制指定三角面
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyfaceToMakeFilterD")(i)
+
+
+projectionPolyfaceToMakeFilterD(1)
+
+(-388.90872965260115, 347.01104689428360)
+(-388.90872965260115, 102.06207261596583) #c
+(-176.77669529663689, 469.48553403344255) #c
+(-176.77669529663689, 224.53655975512478)
+
 
 (-8447.6939391699998, 1504.5572337500000)
 (-8447.6939391699998, 1504.5572337400001)

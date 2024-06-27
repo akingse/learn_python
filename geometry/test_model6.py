@@ -18,7 +18,7 @@ box2=trans(150,-20,30)*scale(150,20,60)*Cube() #遮挡box
 box3=trans(180,-50,50)*scale(150,100,20)*Cube() #互相遮挡
 # create_geometry(box2)
 # create_geometry(box2)
-
+get_discrete_points_from_spline
 
 mesh1=scale(100)*Cube()-trans(50,50)*scale(100)*Cube()
 mesh2=trans(50,0)*scale(100)*Cube()-trans(0,50)*scale(100)*Cube()
@@ -41,8 +41,10 @@ box2=scale(100,100,50*pi)*Cube()
 # create_geometry(trans(50,0)*box2)
 
 # 回头线测试模型
-# create_geometry(trans(0,800,0)*scale(100,100,200)*Cone())
-# create_geometry(trans(-150,400,-200)*scale(300)*Cube())
+create_geometry(trans(0,800,50)*scale(100,100,200)*Cone())
+com=Combine(trans(-150,400,0)*scale(300)*Cube(),trans(300,400,0)*scale(100)*Cube())
+com=Combine(trans(-150,400,0)*scale(300)*Cube())
+create_geometry(com)
 
 
 

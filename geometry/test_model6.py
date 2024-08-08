@@ -1,6 +1,7 @@
 import sys
 import os
 mypath = r'D:\Alluser\learn_python'  # fixed path
+mypath=r'C:\Users\Aking\source\repos\learn_python'
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
 
@@ -41,10 +42,49 @@ box2=scale(100,100,50*pi)*Cube()
 # create_geometry(trans(50,0)*box2)
 
 # 回头线测试模型
-create_geometry(trans(0,800,50)*scale(100,100,200)*Cone())
+# create_geometry(trans(0,800,50)*scale(100,100,200)*Cone())
 com=Combine(trans(-150,400,0)*scale(300)*Cube(),trans(300,400,0)*scale(100)*Cube())
 com=Combine(trans(-150,400,0)*scale(300)*Cube())
-create_geometry(com)
+# create_geometry(com)
+
+
+# 在建筑环境测试
+file=r'C:\Users\Aking\source\repos\bimbase\Bin\Release\OutputGraphicsToJson\\'
+js=JsonRead(file+'Graphics1.Json')
+js.write_python_code()
+
+
+exit()
+# 测试临界模糊布尔
+cube=scale(200,200,1000)*Cube()
+cube=trans(6,-1.5)*rotz(0.03)*scale(200,200,1000)*Cube()
+create_geometry(cube)
+create_geometry(trans(1000,0)*cube)
+cube=trans(0,200,800)*scale(100,1000,200)*Cube()
+create_geometry(trans(1000,0)*cube)
+create_geometry(cube)
+
+exit(0)
+
+cube=trans(-2,0)*rotz(-0.03)*scale(200,150,200)*Cube()
+create_geometry(cube)
+# cube=trans(-0,0)*rotz(-0.0)*scale(200,150,200)*Cube()
+create_geometry(trans(400)*cube)
+cube=trans(0,100,-100)*scale(200,20,380)*Cube()
+create_geometry(cube)
+create_geometry(trans(400)*cube)
+exit()
+
+cone=Cone(Vec3(100,-50,0),Vec3(100,-50,500),20,20)
+create_geometry(cone)
+create_geometry(trans(-200)*cone)
+cube=trans(100-10,-50,0.3)*scale(20,100,500)*Cube()
+create_geometry(cube)
+create_geometry(trans(-200)*trans(0,0,-0.)*cube)
+
+
+exit()
+
 
 
 

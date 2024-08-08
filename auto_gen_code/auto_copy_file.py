@@ -15,7 +15,7 @@ def copy_folder(source_folder, destination_folder):
             shutil.copy2(source_item, destination_item)
             print(f"已复制文件 '{source_item}' 到 '{destination_item}'")
 
-source_folder = "/path/to/source/folder"
-destination_folder = "/path/to/destination/folder"
+source_folder = r"C:\Users\Aking\Pictures\wechat_pic"
+destination_folder = r"D:\Browser\wechat_pic"
 
 copy_folder(source_folder, destination_folder)

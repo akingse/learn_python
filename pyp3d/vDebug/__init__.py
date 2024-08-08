@@ -11,6 +11,7 @@ from .pyp3d_uncouple import *  # 中间解耦
 from .pyp3d_compat_pre import *  # 兼容预处理函数
 from .pyp3d_compat import *  # pyp3d-1.0兼容接口
 from .pyp3d_api import *  # API接口
+from .pyp3d_read_json import *  # json转python
 # calculation
 from .pyp3d_transfer import *  # 几何元素的相互转换
 from .pyp3d_calculation import *  # 几何相关的计算函数

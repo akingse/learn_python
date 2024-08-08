@@ -50,8 +50,28 @@ com=Combine(trans(-150,400,0)*scale(300)*Cube())
 
 # 在建筑环境测试
 file=r'C:\Users\Aking\source\repos\bimbase\Bin\Release\OutputGraphicsToJson\\'
-js=JsonRead(file+'Graphics1.Json')
-js.write_python_code()
+# js=JsonRead(file+'Graphics1.Json')
+# js.write_python_code()
+
+section=Section(Vec3(23450.00201413668,11299.999999999984,8950.0),
+                Vec3(26399.99999999352+5,11299.999999999987,8950.0),
+                Vec3(26400.000000006537-5,11099.999999999987,8950.0),
+                Vec3(23450.002016770304,11099.999999999984,8950.0))
+swept4=Swept(section, Vec3(0.0,0.0,500.0),) #main
+# create_geometry(trans(-100,0)*swept4)
+
+section=Section(Vec3(26300.000000000033,10900.326359186869,6300.0),Vec3(26300.000000000193,11299.999402089355,6300.0),Vec3(26600.000000000193,11299.999402089235,6300.0),Vec3(26600.000000000033,10900.326359186749,6300.0),Vec3(26300.000000000033,10900.326359186869,6300.0),)
+swept15=Swept(section, Vec3(0.0,0.0,3150.0),)
+# create_geometry(swept15)
+
+section=Section(
+    Vec3(49.99999999888371,54950.00000000931,17850),
+    Vec3(49.99999999892316,54650.00000000931,17850),
+    Vec3(49.999999998914745,54650.00000000931,18350),
+    Vec3(49.99999999888678,54950.00000000931,18350),)
+swept0=transz(-20)*rotate_arbitrary(Vec3(49.99999999888371,54950.00000000931,17850),Vec3(0,1,0),-0.005)*Swept(section, Vec3(14000.0,0.0,0.0),) 
+create_geometry(swept0)
+
 
 
 exit()

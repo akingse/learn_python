@@ -328,6 +328,11 @@ def get_surface_of_polygon(points: list) -> float:  # 通过面积判断二维�
     Surfacex2 += points[lenP-1].x * points[0].y-points[0].x * points[lenP-1].y
     return Surfacex2/2
 
+def get_length_of_polygon(points: list) -> float: 
+    length=0
+    for i in range(len(points)-1):
+        length+=norm(points[i+1]-points[i])
+    return length
 
 def get_range_of_polygon(polygon: list) -> list:  # polygon surrounded box
     if len(polygon) == 0:

@@ -48,13 +48,6 @@ def sweep_stere(sec: Section, line: Line, isSmooth=False) -> Combine:
         #     secII = Section(get_discrete_points_from_section(secList[i+1], 30))
         #     if is_two_sections_intersect(secI, secII) == "NOT_COPLANAR_INTER":
         #         raise ValueError('some section self-intersect!')
-        geoList=[]
-        # for i in range(len(secList)-1):
-        #     loft=Loft(secList[i],secList[i+1])
-        #     create_geometry(loft)
-        # for iter in secList:
-        #     show_points_line(get_nested_parts_from_section(iter))
-
         geo = Loft(secList)
         geo.smooth = isSmooth
     return trans(pointRefer)*geo

@@ -31,6 +31,8 @@ Vec2 = GeVec2d
 # def is_all_vec(points): return True if all(isinstance(
 #     i, (GeVec2d, GeVec3d)) for i in points) else False
 def is_all_vec(points) -> bool:
+    if isinstance(points, (GeVec2d, GeVec3d)):
+        return True
     for iter in points:
         if isinstance(iter, (GeVec2d, GeVec3d)):
             continue

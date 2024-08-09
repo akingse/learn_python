@@ -55,17 +55,77 @@ class CombineLinePlace:
         data[PARACMPT_KEYWORD_INTERACT] = Attr(UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_INTERACT_COMBINELINEPLACE),  member=True)
 
+def create_component(data:Noumenon):
+    pyPath = sys.modules[data.__module__].__file__
+    filePath = os.path.dirname(pyPath)
+    fileName = os.path.splitext(os.path.basename(pyPath))[0]
+    className = data.__class__.__name__
+    data[PARACMPT_KEYWORD_REPLACE] = Attr(UnifiedFunction('{}/{}'.format(filePath, fileName), '{}.replace'.format(className)), member = True)
+    data[PARACMPT_KEYWORD_REPRESENTATION] = '{}.{}'.format(fileName, className)
+    data[PARACMPT_KEYWORD_SOURCE] = filePath
+    data[PARACMTP_PLACE_CUSTOM_TOOL] = Attr(True, obvious=False, readonly=True)
+    depend = DependentFile()
+    depend.readFile(pyPath)
+    data[PARACMPT_KEYWORD_DEPENDENT_FILE] = depend
+    return data
+
+def get_bfa_component():
+    if not isinside_global_variable('bfa_component_data'):
+        if not isinside_global_variable('bfa_cache_component_data'):
+            nou = UnifiedFunction('BPParametricComponent', 'get_bfa_component_data_by_tool')(sys.argv[0])
+            set_global_variable('bfa_cache_component_data', {sys.argv[0], nou})
+            return copy.deepcopy(nou)
+        else:
+            cacheData = get_global_variable('bfa_cache_component_data')
+            if cacheData[0] != sys.argv[0]:
+                nou = UnifiedFunction('BPParametricComponent', 'get_bfa_component_data_by_tool')(sys.argv[0])
+                set_global_variable('bfa_cache_component_data', {sys.argv[0], nou})
+                return copy.deepcopy(nou)
+            else:
+                return copy.deepcopy(cacheData[1])
+    else:
+        return copy.deepcopy(get_global_variable('bfa_component_data'))
+
 def place(noumenon: Noumenon):  # 通过布置工具放置组件
     if get_global_variable('is_script_to_josn'):
         set_global_variable('script_to_josn', noumenon)
     else:
-        depend = DependentFile()
-        depend.readFile(sys.argv[0])
-        noumenon[PARACMPT_KEYWORD_DEPENDENT_FILE] = depend
+        if PARACMPT_KEYWORD_DEPENDENT_FILE not in noumenon:
+            depend = DependentFile()
+            depend.readFile(sys.argv[0])
+            noumenon[PARACMPT_KEYWORD_DEPENDENT_FILE] = depend
         UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                         PARACMPT_PLACE_INSTANCE)(noumenon)
 
+def execute_command(str=""):
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_EXECUTE_COMMAND)(str)
 
+def get_boxselect_flag() :
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_BOXSELECT_FLAG)()
+def get_entityid_from_marquee():
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_ENTITYID_FROM_MARQUEE)()
+def get_element_from_boxselect(str = "PyMarqueeTool") :
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_ELEMENT_FROM_BOXSELECT)(str)
+    while True:
+            if(get_boxselect_flag()):
+                return get_entityid_from_marquee()
+def get_dynamic_point():
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_DYNAMIC_POINT)()
+def get_pointselect_flag() :
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_POINTSELECT_FLAG)()
+def get_current_point():
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_CURRENT_POINT)()
+def get_point_from_pointselect() :
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_POINT_FROM_POINTSELECT)()
+    while True:
+            if(get_pointselect_flag()):
+                return get_current_point()
+def get_sub_entityid(entityid: P3DEntityId):
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,PARACMPT_GET_SUB_ENTITYID)(entityid)
+def get_current_entityId():
+     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_CURRENT_ENTITYID)()
+def get_close_point(point,eneityId: P3DEntityId) :
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_CLOSE_POINT)(point,eneityId)
 def entityid_isvaid(entityid: P3DEntityId):
     if entityid._ModelId <= -2 or entityid._ElementId < 0:return False
     return True
@@ -83,30 +143,31 @@ def place_to(noumenon: Noumenon, transform: GeTransform = GeTransform()):  # 在
     '''
     appoint position where geometry place to
     '''
-    depend = DependentFile()
-    if isinside_global_variable('\a_path'):
-        toolpath = get_global_variable('\a_path')
-        division = ''
-        if '/' in toolpath:
-            division = '/'
-        if '\\' in toolpath:
-            division = '\\'
-        pos = toolpath.rfind(division)
-        modelpath = toolpath[:pos]+division+noumenon.__module__+'.py'
-        noumenon[PARACMPT_KEYWORD_SOURCE] = modelpath
-        noumenon[PARACMPT_KEYWORD_REPRESENTATION] = '{0}.{1}'.format(
-            os.path.splitext(os.path.split(modelpath)[1])[0], type(noumenon).__name__)
-        if isinside_global_variable('interface'):
-            noumenon[PARACMPT_KEYWORD_TOOL] = toolpath[pos+1:] + \
-                '.py'+'.interface'
-            set_global_variable('interface', False)
-        else:
-            noumenon[PARACMPT_KEYWORD_TOOL] = toolpath[pos+1:]+'.py'
-        depend.readFile(toolpath[:pos], modelpath, toolpath+'.py')
+    if PARACMPT_KEYWORD_DEPENDENT_FILE not in noumenon:
+        depend = DependentFile()
+        if isinside_global_variable('\a_path'):
+            toolpath = get_global_variable('\a_path')
+            division = ''
+            if '/' in toolpath:
+                division = '/'
+            if '\\' in toolpath:
+                division = '\\'
+            pos = toolpath.rfind(division)
+            modelpath = toolpath[:pos]+division+noumenon.__module__+'.py'
+            noumenon[PARACMPT_KEYWORD_SOURCE] = modelpath
+            noumenon[PARACMPT_KEYWORD_REPRESENTATION] = '{0}.{1}'.format(
+                os.path.splitext(os.path.split(modelpath)[1])[0], type(noumenon).__name__)
+            if isinside_global_variable('interface'):
+                noumenon[PARACMPT_KEYWORD_TOOL] = toolpath[pos+1:] + \
+                    '.py'+'.interface'
+                set_global_variable('interface', False)
+            else:
+                noumenon[PARACMPT_KEYWORD_TOOL] = toolpath[pos+1:]+'.py'
+            depend.readFile(toolpath[:pos], modelpath, toolpath+'.py')
 
-    else:
-        depend.readFile(sys.argv[0])
-    noumenon[PARACMPT_KEYWORD_DEPENDENT_FILE] = depend
+        else:
+            depend.readFile(sys.argv[0])
+        noumenon[PARACMPT_KEYWORD_DEPENDENT_FILE] = depend
     noumenon[PARACMPT_KEYWORD_TRANSFORMATION] = transform
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                     "BPParametricComponentManager::create")(noumenon)
@@ -129,6 +190,9 @@ def show_Input_Dlg(isshow: bool):
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                     PARACMPT_SHOW_INPUT_DLG)(isshow)
 
+def get_noumKV_from_instancekey(instancekey: P3DInstanceKey):
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_NOUMKV_FROM_INSTANCEKEY)(instancekey)
+    
 def python_transformation_operation(entityid1: P3DEntityId,transform: GeTransform):
     UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_PYTHON_TRANSFORMATION_OPERATION)(entityid1,transform)
 
@@ -303,6 +367,20 @@ def create_bsplinepoints(controlPoints: list, curveOrder: int, discreteNum: int)
     else:
         return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_CREATE_BSPLINEPOINTS)(controlPoints, curveOrder, discreteNum)
 
+def get_bsplinepoints(*args) -> list:
+    # controlPoints: list, curveOrder: int, discreteNum: int, close:bool
+    if (len(args)==4):
+        controlPoints=args[0]
+        curveOrder=args[1]
+        discreteNum=args[2]
+        close=args[3]
+    elif (len(args)==1) and isinstance(args[0],SplineCurve):
+        controlPoints=args[0].transformation*args[0].points
+        curveOrder=args[0].k
+        discreteNum=args[0].num
+        close=args[0].closed
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_GET_BSPLINEPOINTS)(controlPoints, curveOrder, discreteNum, close)
+
 
 def delete_data_bydatakey(instancekey: P3DInstanceKey):  # 根据instancekey删除instance
     '''
@@ -450,7 +528,26 @@ def create_geometry(noumenon: Noumenon):  # 在全局坐标系的原点创建一
     create a geometry at the origin of the global coordinate system
     '''
     return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_CREATE_GEOMETRY)(noumenon)
-
+def snapshoot_control(hide:list,show:list):
+    '''
+    control shapshoot show or hide time
+    '''
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_SNAPSHOOT_CONTROL)(hide,show)
+def snapshoot_control_turbo(hideframe:list,showframe:list,interval:int = 0):
+    '''
+    turbo! control shapshoot show or hide time 
+    '''
+    hideByteArray = []
+    for hideset in hideframe:
+        bs = BufferStack()
+        bs.push(hideset)
+        hideByteArray.append(bs._imp)
+    showByteArray = []
+    for showset in showframe:
+        bs = BufferStack()
+        bs.push(showset)
+        showByteArray.append(bs._imp)
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  PARACMPT_SNAPSHOOT_CONTROL_TURBO)(hideByteArray,showByteArray,interval)
 
 def create_material(name: str,  **kw) -> P3DMaterial:  # 创建材质库, 返回P3DMateria对象
     '''
@@ -765,7 +862,24 @@ def get_line_from_curvearray(entityid: P3DEntityId):
         raise TypeError('input parameter error,  please input "entityid"!')
     para = UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
                            PARACMPT_GET_LINE_FROM_CURVEARRAY)(entityid)
-    return Line(para)
+    if len(para) >0:
+        relatedLine = para[0]
+    if relatedLine.representation== "Segment":
+        res=Segment(relatedLine.m_start,relatedLine.m_end)
+    if relatedLine.representation== "Arc":#椭圆线
+        res= relatedLine.transformation*Arc()
+    if relatedLine.representation== "Line":#多段线
+        res= Line(relatedLine.parts)
+    if relatedLine.representation== "SplineCurve":#b样条
+        res= relatedLine
+    return res
+def get_line_from_curvearraies(entityids: List):
+    result = []
+    for iter  in  entityids:
+        line = get_line_from_curvearray(iter)
+        result.append(line)
+    return result
+    
 
 
 def messages(message: str):
@@ -815,6 +929,9 @@ def set_terminal_port_line(noumenon: Noumenon, name: str, center: GeVec3d, secon
 def set_terminal_port_line_direction(noumenon: Noumenon, name: str, center: GeVec3d, second: GeVec3d, direction: GeVec3d):
     noumenon[name + "连接点"] = Attr(TerminalPort(center, second, direction))
 
+def BIMBase_command(str:str):
+    UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,
+                    PARACMPT_BIMBASE_COMMAND)(str)
 
 # pyp3d_api synonym
 launchData = place

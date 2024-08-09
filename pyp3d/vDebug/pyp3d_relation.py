@@ -337,7 +337,7 @@ def get_intersect_point_of_line_arc(line: Segment, arc: Arc, isLine=False, isCir
     # line on arc plane
     invM = inverse(forwM)  # get the unit arc
     lineA = invM*line
-    if (1.0 < get_distance_of_point_line(GeVec3d(0,0),lineA)):
+    if (1.0 < get_distance_of_point_line(GeVec3d(0,0), lineA)): #not intersect
         return []
     theta = get_angle_of_two_vectors(g_axisX, lineA.vectorU)
     lineR = rotz(-theta)*lineA
@@ -833,12 +833,14 @@ def is_contourline_self_intersect(line: Line) -> str:
         if len(points) >= 1:
             return "SELF_INTER"
     for i in range(2, lenL-1):  # first segment
-        if len(get_intersect_points_of_fragments(frags[0], frags[i])) >= 1:
-            return "SELF_INTER"
+        if get_intersect_points_of_fragments(frags[0], frags[i]):
+            if len(points) >= 1:
+                return "SELF_INTER"
     for i in range(1, lenL):
         for j in range(i+2, lenL):  # range cannot from big to small
-            if len(get_intersect_points_of_fragments(frags[i], frags[j])) >= 1:
-                return "SELF_INTER"
+            if get_intersect_points_of_fragments(frags[i], frags[j]):
+                if len(points) >= 1:
+                    return "SELF_INTER"
     return "EACH_SEPA"
 
 

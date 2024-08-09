@@ -95,6 +95,9 @@ def arc_of_radius_points_2D(pStart: GeVec2d, pEnd: GeVec2d, R: float) -> Arc:
     theta = atan2(p1.y-pCenter.y, p1.x-pCenter.x)
     return trans(pCenter)*scale(abs(R))*rotz(theta)*Arc(2*thetaScope)
 
+def arc_of_center_start_scope(pCenter: GeVec2d, pStart: GeVec2d, scope: float)->Arc:
+    vec=pStart-pCenter
+    return trans(pCenter)*rotz(atan2(vec.y,vec.x))*scale(vec.norm())*Arc(scope)
 
 arc_of_radius_points = arc_of_radius_points_2D
 
@@ -308,6 +311,9 @@ def arc_semicircle_to_section(r:float)->Section:
 def arc_of_scope_and_radius_2D(R, scope, angle=0.0) -> Arc:
     return rotz(angle)*scale(R)*Arc(scope)
 
+def arc_of_angle_and_radius_2D(angle, R, scope) -> Arc:
+    return scale(R)*Arc(scope)
+	
 # ------------------------------------------------------------------------------------------
 # |                                       PATTERN                                          |
 # ------------------------------------------------------------------------------------------
@@ -344,8 +350,10 @@ def regular_polygon(num: int, length: float, isR=True) -> list:  # XoY平面正�
         pList.append(rotz(i/num*2*pi)*p1)
     return pList  # closed
 
+def regular_polygon_seciton(num: int, length: float, isR=True) -> Section:  # XoY平面正多边形
+    return Section(*regular_polygon(num, length,isR))
 
-def rectangle_central_symmetry(x: float, y: float, R=0.0) -> list:  # 中心对称圆角矩形(XoY)
+def rectangle_central_symmetry_line(x: float, y: float, R=0.0) -> list:  # 中心对称圆角矩形(XoY)
     x = abs(copy.deepcopy(x))
     y = abs(copy.deepcopy(y))
     if is_float_zero(R):
@@ -353,8 +361,42 @@ def rectangle_central_symmetry(x: float, y: float, R=0.0) -> list:  # 中心对�
     else:
         return rectangle_diagonal(GeVec2d(-x, -y), GeVec2d(x, y), R).parts
 
+def rectangle_central_symmetry_section(x: float, y: float, R=0.0) -> Section:  # 中心对称圆角矩形(XoY)
+    return Section(rectangle_central_symmetry(x,y,R))
 
-def rectangle_diagonal(pointA: GeVec2d, pointC: GeVec2d, R=0.0) -> Section:  # 对角线圆角矩形(XoY)
+def rectangle_square(center: GeVec3d=GeVec3d(0,0),  d=1.0) -> Section:  # 中心点-正方形
+    r=0.5*d
+    x=center.x
+    y=center.y
+    return transz(center.z)*Section(GeVec3d(x+r,y+r),GeVec3d(x-r,y+r),GeVec3d(x-r,y-r),GeVec3d(x+r,y-r))
+
+
+def rectangle_diagonal_line(pointA: GeVec2d, pointC: GeVec2d, R=0.0) -> Section:  # 对角线圆角矩形(XoY)
+    # rectangle rounded 自动生成带有倒角的对角线矩形section，与坐标系轴平行(pointA左下->pointC右上)
+    if not is_line_in_two_dimensional([pointA, pointC]):
+        raise ValueError('points must in two dimensional!')
+    p1 = to_vec2(copy.deepcopy(pointA))
+    p2 = to_vec2(copy.deepcopy(pointC))
+    if (p1-p2).x >= 0 and (p1-p2).y >= 0:
+        p1, p2 = p2, p1  # swap value
+    q1 = GeVec2d(p2.x, p1.y)
+    q2 = GeVec2d(p1.x, p2.y)
+    if abs(R) < PL_A:  # without arc chamfer
+        return [p1, q1, p2, q2]
+    if abs(p1.x-p2.x) < PL_A or abs(p1.y-p2.y) < PL_A:  # collinear become segment
+        return [p1, q1, p2, q2]
+    d = min(abs(p2.x-p1.x), abs(p2.y-p1.y))
+    if R < 0 or R > d/2:
+        raise ValueError('R value error!')
+    else:
+        dx = math_sign(p2.x-p1.x)*GeVec2d(R, 0)
+        dy = math_sign(p2.y-p1.y)*GeVec2d(0, R)
+        return [trans(q1-dx+dy)*rotz(-pi/2)*scale(R)*Arc(pi/2),
+                trans(p2-dx-dy)*rotz(0)*scale(R)*Arc(pi/2),
+                trans(q2+dx-dy)*rotz(pi/2)*scale(R)*Arc(pi/2),
+                trans(p1+dx+dy)*rotz(pi)*scale(R)*Arc(pi/2)]
+
+def rectangle_diagonal_seciton(pointA: GeVec2d, pointC: GeVec2d, R=0.0) -> Section:  # 对角线圆角矩形(XoY)
     # rectangle rounded 自动生成带有倒角的对角线矩形section，与坐标系轴平行(pointA左下->pointC右上)
     if not is_line_in_two_dimensional([pointA, pointC]):
         raise ValueError('points must in two dimensional!')
@@ -378,14 +420,10 @@ def rectangle_diagonal(pointA: GeVec2d, pointC: GeVec2d, R=0.0) -> Section:  # �
                        trans(p2-dx-dy)*rotz(0)*scale(R)*Arc(pi/2),
                        trans(q2+dx-dy)*rotz(pi/2)*scale(R)*Arc(pi/2),
                        trans(p1+dx+dy)*rotz(pi)*scale(R)*Arc(pi/2))
-        # return Section(p1+dx, q1-dx, trans(q1-dx+dy)*rotz(-pi/2)*scale(R)*Arc(pi/2),
-        #                q1+dy, p2-dy, trans(p2-dx-dy) *
-        #                rotz(0)*scale(R)*Arc(pi/2),
-        #                p2-dx, q2+dx, trans(q2+dx-dy) *
-        #                rotz(pi/2)*scale(R)*Arc(pi/2),
-        #                q2-dy, p1+dy, trans(p1+dx+dy)*rotz(pi)*scale(R)*Arc(pi/2))
 
-rectangle_diagonal_section=rectangle_diagonal
+rectangle_diagonal=rectangle_diagonal_seciton
+rectangle_central_symmetry=rectangle_central_symmetry_line
+
 # ------------------------------------------------------------------------------------------
 # |                                        BODY                                            |
 # ------------------------------------------------------------------------------------------
@@ -436,36 +474,6 @@ def conus_underside_vertex(arc: Arc, pVertex: GeVec3d) -> Loft:  # （顶点）�
     arcT.scale_center(PL_E6)
     arcTop = trans(pVertex-pCenter)*Section(arcT)
     return Loft(arcBottom, arcTop)
-
-
-def FilletPipe_Sweep(points=[GeVec3d(0, 0, 0), GeVec3d(100, 0, 0),  GeVec3d(100, 0, 50), GeVec3d(200, 0, 0)], filletRadius=10.0, pipeRadius=2):  # 圆角管
-    line=[]
-    if (isinstance(filletRadius,list)):
-        filletRadius=filletRadius[1]
-    if len(points)==2:
-        pStartB=points[0]
-    for i in range(len(points)-2):
-        if (i==0):
-            pStartA=points[i]
-        else:
-            pStartA=pStartB
-        vecA=(points[i+1]-points[i]).unitize()
-        vecB=(points[i+2]-points[i+1]).unitize()
-        theta=get_angle_of_two_vectors(-vecA,vecB,True)
-        d=filletRadius/tan(theta/2)
-        pEndA=points[i+1]-d*vecA
-        line.append(Segment(pStartA,pEndA))
-        pStartB=points[i+1]+d*vecB
-        c=sqrt(d*d+filletRadius*filletRadius)
-        pCenter=points[i+1]+c*(0.5*(-vecA+vecB)).unitize()
-        arc=arc_of_center_points(pCenter,pEndA,pStartB)
-        line.append(arc)
-    line.append(Segment(pStartB,points[-1]))
-    mat=get_matrix_from_two_points(points[0],points[1])
-    sec=mat*scale(pipeRadius)*Section(Arc())
-    # create_geometry(sec)
-    # create_geometry(Line(line))
-    return Sweep(sec,Line(line))
 
 # ------------------------------------------------------------------------------------------
 # |                                        SHOW                                            |
@@ -568,9 +576,9 @@ def show_points_line(points: list, radius=0, withEnd=True, isShow=True) -> Combi
         return geo
     lenList = [100]
     for i in range(len(points)-1):
-        if norm(points[i]-points[i+1]) > PL_A:  # only add non-zero norm vector
+        if norm(points[i]-points[i+1]) > 1e-2:  # only add non-zero norm vector
             lenList.append(norm(points[i]-points[i+1]))
-    if norm(points[0]-points[-1]) > PL_A:
+    if norm(points[0]-points[-1]) > 1e-2: #PL_A:
         lenList.append(norm(points[0]-points[-1]))
     minR = min(lenList)
     if radius == 0:
@@ -707,7 +715,6 @@ def get_nearest_distance_of_two_segment(seg1: Segment, seg2: Segment) -> float:
         dmin2 = min(norm(seg1.end-seg2.start), norm(seg1.end-seg2.end))
     return min(dmin1, dmin2)
 
-
 def check_section_self_intersect(section:Section)->bool:
     fragms=get_fragments_from_section(section)
     if len(fragms)==1 and isinstance(fragms[0],(Arc,Ellipse)):
@@ -724,4 +731,79 @@ def check_section_self_intersect(section:Section)->bool:
                 # show_points_line([fragms[j].start,fragms[j].end])
                 return True
     return False
+
+# ------------------------------------------------------------------------------------------
+# |                                        BOOLEAN                                           |
+# ------------------------------------------------------------------------------------------
+
+# 布尔FaceReport输出python绘制
+
+def create_section_parity_list(pathsFace:list):
+    pathsFaceList=[]
+    temp=[]
+    for i in range(len(pathsFace)):
+        if len(pathsFace[i])!=0:
+            temp.append(pathsFace[i])
+        else:
+            pathsFaceList.append(temp)
+            temp=[]
+    for iter in pathsFaceList:
+        create_geometry(create_section_parity(iter))
+
+    
+def create_section_parity(pathsFace:list): # and profile line
+    color=[random(),random(),random(),0.9]
+    geo=Combine()
+    paths=Fusion().color(*color)
+    if len(pathsFace)==0:
+        return paths
+    paths.parts.append(Section(pathsFace[0]))
+    for i in range(1,len(pathsFace)):
+        paths.parts.append(-Section(pathsFace[i]))
+    geo.append(paths)
+    for iter in pathsFace:
+        geo.append(Line(iter).color(*color))
+    return geo
+
+def create_section_parity_and_number(pathsFace:list, index=-1):
+    color=[random(),random(),random()]
+    geo=Combine()
+    paths=Fusion().color(*color)
+    if len(pathsFace)==0:
+        return paths
+    paths.parts.append(Section(pathsFace[0]))
+    for i in range(1,len(pathsFace)):
+        paths.parts.append(-Section(pathsFace[i]))
+    geo.append(paths)
+    if index!=-1:
+        mat=get_matrix_from_points(pathsFace[0])
+        area=get_length_of_polygon(pathsFace[0])
+        text=mat*Text(str(index)).color(*color)
+        text.size=area/30
+        geo.append(text)
+    return geo
+    
+    
+def getFaceFromIndex(polyface :Polyface,ibo):
+    return Section([
+        polyface.vertexList[abs(polyface.faceList[ibo*4+0])-1],
+        polyface.vertexList[abs(polyface.faceList[ibo*4+1])-1],
+        polyface.vertexList[abs(polyface.faceList[ibo*4+2])-1]])
+
+# iterate triangle
+def create_iterate_triangle(polyface0 :Polyface):
+    for i in range(int(len(polyface0.faceList)/4)):
+        create_geometry(getFaceFromIndex(polyface0, i).colorRand())
+
+def create_iterate_triangle_and_number(polyface :Polyface):
+    for i in range(int(len(polyface.faceList)/4)):
+        pathsFace=[
+            [
+            polyface.vertexList[abs(polyface.faceList[i*4+0])-1],
+            polyface.vertexList[abs(polyface.faceList[i*4+1])-1],
+            polyface.vertexList[abs(polyface.faceList[i*4+2])-1]
+            ]
+        ]
+        create_geometry(create_section_parity_and_number(pathsFace, i))
+        time.sleep(1)
 

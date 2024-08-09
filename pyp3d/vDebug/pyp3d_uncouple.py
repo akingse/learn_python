@@ -10,7 +10,7 @@ from .pyp3d_compat import *
 def _push_noumenon(value):
     bs = BufferStack()
     # 自动装载表象名
-    if not runtime_is_service() and issubclass(type(value), Component) and type(value).__name__ != 'Component':
+    if not runtime_is_service() and issubclass(type(value), Component) and type(value).__name__ != 'Component' and PARACMTP_PLACE_CUSTOM_TOOL not in value:
         value.at(PARACMPT_KEYWORD_SOURCE).setup(obvious=False, readonly=True)
         value.at(PARACMPT_KEYWORD_REPRESENTATION).setup(
             obvious=False, readonly=True)
@@ -33,6 +33,8 @@ def _push_noumenon(value):
                     baseName = '{0}.{1}'.format(
                         baseClassName.__module__, baseClassName.__name__)
     for methodName in get_export_method('{0}.{1}'.format(type(value).__module__, type(value).__name__), baseNameList):
+        if methodName == PARACMPT_KEYWORD_REPLACE and PARACMTP_PLACE_CUSTOM_TOOL in value:
+            continue
         value[methodName] = Attr(UnifiedFunction(
             getattr(type(value), methodName)), member=True)
     for key in value._noumenon_order[::-1]:
@@ -49,6 +51,8 @@ def _pop_noumenon(bs: BufferStack):
         value._noumenon_data = data
         value._noumenon_order = order
         return value
+    if PARACMTP_PLACE_CUSTOM_TOOL in order and PARACMPT_KEYWORD_SOURCE in order:
+        set_core_source(data[PARACMPT_KEYWORD_SOURCE].this)
     temp = os.path.splitext(data[PARACMPT_KEYWORD_REPRESENTATION].this)
     if temp[1] == '':
         cla = eval(temp[0])

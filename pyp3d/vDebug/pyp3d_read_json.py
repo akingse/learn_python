@@ -127,10 +127,10 @@ def _getGeCurveArrayParityRegion(curveArray):
     # using outer and inner
     for iter in curves:
         if (iter['IGeCurveBase']["GeCurveArray"]["BoundaryType"] == 'BOUNDARY_TYPE_Outer'):  # outer is positive
-            sectionI = -Section(_getLineFromGeCurveArray(
+            sectionI = Section(_getLineFromGeCurveArray(
                     iter['IGeCurveBase']["GeCurveArray"]["Curves"]))
         else:  # BOUNDARY_TYPE_Inner
-            sectionI = Section(_getLineFromGeCurveArray(
+            sectionI = -Section(_getLineFromGeCurveArray(
                 iter['IGeCurveBase']["GeCurveArray"]["Curves"]))
         # create_geometry(sectionI)
         sectionList.append(sectionI)

@@ -529,10 +529,10 @@ class Arc(Primitives):
         else:
             raise ValueError('improper parameters!')
 
-    def scale_center(self, sca: float = 1):
+    def scale_center(self, scaX: float = 1, scaY: float = 1):
         pos = get_translate_matrix(self.transformation)
         rot = get_matrixs_rotation(self.transformation)
-        self.transformation = pos*scale(sca)*rot
+        self.transformation = pos*scale(scaX, scaY)*rot
         # self.transformation = self.transformation * \
         #     scale(sca)*inverse(self.transformation) * self.transformation
 
@@ -630,7 +630,7 @@ class Section(Primitives):
         self.transformation = self._get_first_matrix_from_line(self.parts)
         if is_two_dimensional_matrix(self.transformation):
             self.transformation = GeTransform()
-        self.samePlane=True
+        # self.samePlane=True
         # if self.samePlane:
         # if not self._is_parts_on_same_plane(self.parts):
         #     raise TypeError('Section parts must locate on same plane!')
@@ -873,7 +873,7 @@ class Lofted(Primitives):
                 if (count_guide_path != self._count_fragment_of_section(args[0])):
                     raise TypeError('guide_path and edges acount error!')
         else:
-            raise TypeError('improper type!')
+            return
         self.bot_profile = args[0]
         self.top_profile = args[1]
         if (type(self.bot_profile) != type(self.top_profile)):
@@ -883,6 +883,28 @@ class Lofted(Primitives):
         self.capped = True
         self.showTest = False
         # self.count_edge = self._count_fragment_of_section(self.bot_profile)
+        # the pre-judge of profile vertex and guideline start-end point
+        if isinstance(self.bot_profile, Section) and isinstance(self.top_profile, Section) and len(self.guide_path) != 0:
+            botPoints = self._get_fragment_points_of_section(self.bot_profile)
+            topPoints = self._get_fragment_points_of_section(self.top_profile)
+            if (len(botPoints) != len(topPoints)):
+                raise TypeError(
+                    'bot_profile and top_profile edges acount error!')
+            if (all(isinstance(iter, (list, tuple)) for iter in self.guide_path)):  # nest list
+                guideLine = self.guide_path[0]
+                if len(botPoints) != len(guideLine):
+                    raise TypeError(
+                        'bot_profile and top_profile edges acount error!')
+            else:
+                guideLine = self.guide_path
+                if len(botPoints) != len(guideLine):
+                    raise TypeError(
+                        'bot_profile and top_profile edges acount error!')
+            # for i in range(len(self.guide_path)):
+            #     if not is_coincident(self._get_part_start_point(guideLine[i]), botPoints[i]):
+            #         raise TypeError('bot_profile points not coincident!')
+            #     if not is_coincident(self._get_part_end_point(guideLine[i]), topPoints[i]):
+            #         raise TypeError('top_profile points not coincident!')
 
     def _get_part_start_point(self, part) -> GeVec3d:
         if isinstance(part, (GeVec2d, GeVec3d)):
@@ -894,7 +916,7 @@ class Lofted(Primitives):
         elif isinstance(part, SplineCurve):
             return part.transformation*part.points[0]
         elif isinstance(part, Line) and len(part.parts) > 0:
-            return self._get_part_start_point(part[0])
+            return part.transformation*self._get_part_start_point(part.parts[0])
         elif isinstance(part, list) and len(part) > 0:
             if is_all_vec(part[0]):
                 return part[0]
@@ -913,7 +935,7 @@ class Lofted(Primitives):
         elif isinstance(part, SplineCurve):
             return part.transformation*part.points[-1]
         elif isinstance(part, Line) and len(part.parts) > 0:
-            return self._get_part_end_point(part[-1])
+            return part.transformation*self._get_part_end_point(part.parts[-1])
         elif isinstance(part, list) and len(part) > 0:
             if is_all_vec(part[-1]):
                 return part[-1]
@@ -924,7 +946,7 @@ class Lofted(Primitives):
 
     # nonsupport nest line
     def _count_fragment_of_section(self, sec: Section) -> int:
-        if not isinstance(sec, Section):
+        if not isinstance(sec, Section) or len(sec.parts) == 0:
             return 0
         count = 0
         lenL = len(sec.parts)
@@ -946,6 +968,28 @@ class Lofted(Primitives):
             if isinstance(sec.parts[0], (GeVec2d, GeVec3d)):
                 count -= 1
         return count
+
+    def _get_fragment_points_of_section(self, sec: Section) -> list:
+        if not isinstance(sec, Section) or len(sec.parts) == 0:
+            return []
+        pointList = []
+        lenL = len(sec.parts)
+        # parts=sec.transformation*sec.parts
+        for i in range(lenL-1):  # only add fragment which norm greater than zero
+            if isinstance(sec.parts[i], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)):
+                pointList.append(self._get_part_start_point(sec.parts[i]))
+            if not is_coincident(self._get_part_end_point(sec.parts[i]), self._get_part_start_point(sec.parts[i+1])):
+                pointList.append(self._get_part_end_point(sec.parts[i]))
+                if isinstance(sec.parts[i+1], (GeVec2d, GeVec3d)):
+                    pointList.pop()
+        _l = lenL-1
+        if isinstance(sec.parts[_l], (GeVec2d, GeVec3d, Arc, SplineCurve, Segment)):
+            pointList.append(self._get_part_start_point(sec.parts[_l]))
+        if not is_coincident(self._get_part_end_point(sec.parts[_l]), self._get_part_start_point(sec.parts[0])):
+            pointList.append(self._get_part_end_point(sec.parts[_l]))
+            if isinstance(sec.parts[0], (GeVec2d, GeVec3d)):
+                pointList.pop()
+        return sec.transformation*pointList
 
     # BOT
     @ property
@@ -1224,11 +1268,13 @@ class Fusion(Primitives):
         self.representation = 'Fusion'
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_FUSION_TO_GRAPHICS)
-        args = list(args)
-        for i in range(len(args)):
-            if isinstance(args[i], (list, tuple)):
-                args[i] = Combine(*args[i])
-        self.parts = list(args)
+        # for i in range(len(args)):
+        #     if isinstance(args[i], (list, tuple)):
+                # args[i] = Combine(*args[i])
+        if len(args)==1 and isinstance(args[0],(list,tuple)):
+            self.parts = list(args[0])
+        else:
+            self.parts = list(args)
 
     def __add__(self, other):
         res = copy.deepcopy(self)
@@ -1293,7 +1339,9 @@ class Array(Primitives):
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_ARRAY_TO_GRAPHICS)
         self.ontology = ontology
-        self.parts = list(args)
+        self.parts = list(args) #matrix list
+        # self.isinstance=True
+        self.isinstance=False
 
     @ property
     def ontology(self):
@@ -1302,6 +1350,14 @@ class Array(Primitives):
     @ ontology.setter
     def ontology(self, val):
         self[PARACMPT_ARRAY_ONTOLOGY] = val
+
+    @ property
+    def isinstance(self):
+        return self[PARACMPT_ARRAY_ISINSTANCE]
+
+    @ isinstance.setter
+    def isinstance(self, val):
+        self[PARACMPT_ARRAY_ISINSTANCE] = val
 
     @ property
     def parts(self):
@@ -1325,7 +1381,7 @@ class Array(Primitives):
 
 
 class SplineCurve(Primitives):
-    def __init__(self, ctrlPoints=[], discNum=0, orderK=2, splineType='quasi'):
+    def __init__(self, ctrlPoints=[], discNum=None, orderK=None, isClose=False):  # splineType='',
         '''
         splineType      类型:        quasi           准均匀B样条
         '''
@@ -1334,9 +1390,15 @@ class SplineCurve(Primitives):
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_SPLINECURVE_TO_GRAPHICS)
         self.points = ctrlPoints
-        self.num = discNum
-        self.k = orderK
-        self.type = splineType
+        self.num = 0 if (discNum == None) else discNum
+        self.k = 3 if (orderK == None) else orderK
+        if (self.k > len(ctrlPoints)):
+            self.k = len(ctrlPoints)
+        self.type = ''
+        self.closed = isClose
+        self.weighted = False  # inputPolesAlreadyWeighted
+        self.weights = []
+        self.knots = []
 
     def symbology(self, color, weight, style):
         self[PARACMPT_KEYWORD_STYLE] = Symbology(color, weight, style)
@@ -1382,9 +1444,41 @@ class SplineCurve(Primitives):
     def get_points(self):  # get control points of multiply transform
         return self.transformation*self.points
 
+    @ property
+    def closed(self):
+        return self[PARACMPT_SPLINECURVE_CLOSED]
+
+    @ closed.setter
+    def closed(self, val):
+        self[PARACMPT_SPLINECURVE_CLOSED] = val
+
+    @ property
+    def weighted(self):  # not work
+        return self[PARACMPT_SPLINECURVE_WEIGHTED]
+
+    @ weighted.setter
+    def weighted(self, val):
+        self[PARACMPT_SPLINECURVE_WEIGHTED] = val
+
+    @ property
+    def weights(self):
+        return self[PARACMPT_SPLINECURVE_WEIGHTS]
+
+    @ weights.setter
+    def weights(self, val):
+        self[PARACMPT_SPLINECURVE_WEIGHTS] = val
+
+    @ property
+    def knots(self):
+        return self[PARACMPT_SPLINECURVE_KNOTS]
+
+    @ knots.setter
+    def knots(self, val):
+        self[PARACMPT_SPLINECURVE_KNOTS] = val
+
 
 class ParametricEquation(Primitives):  # Parametric Equation
-    def __init__(self, stepList: list, func: FunctionType):  # : function
+    def __init__(self, stepList: list=[], func: FunctionType=None):  # : function
         Primitives.__init__(self)
         self.representation = 'ParametricEquation'
         self.extractGraphics = UnifiedFunction(
@@ -1417,28 +1511,29 @@ class ParametricEquation(Primitives):  # Parametric Equation
 
 
 class Polyface(Primitives):  # 三角面片
-    def __init__(self, filePath=''):
+    def __init__(self, filePath = ''):
         Primitives.__init__(self)
         self.representation = 'Polyface'
         self.extractGraphics = UnifiedFunction(
             PARACMPT_PARAMETRIC_COMPONENT, PARACMPT_POLYFACE_TO_GRAPHICS)
         vertexListO = []
         faceListO = []
-        if (filePath!=''):
-            with open(filePath) as file:
+        if not os.path.isfile(filePath):
+            return
+        with open(filePath) as file:
+            line = file.readline()
+            while line:
+                line = line.replace('\n', '')
+                strs = line.split(" ")
+                if strs[0] == "v":
+                    vertexListO.append(
+                        GeVec3d(10000*float(strs[1]), 10000*float(strs[2]), 10000*float(strs[3])))
+                if strs[0] == "f":
+                    for i in range(1, len(strs)):
+                        faces = strs[i].split("/")
+                        faceListO.append(int(faces[0]))
+                    faceListO.append(int(0))
                 line = file.readline()
-                while line:
-                    line = line.replace('\n', '')
-                    strs = line.split(" ")
-                    if strs[0] == "v":
-                        vertexListO.append(
-                            GeVec3d(10000*float(strs[1]), 10000*float(strs[2]), 10000*float(strs[3])))
-                    if strs[0] == "f":
-                        for i in range(1, len(strs)):
-                            faces = strs[i].split("/")
-                            faceListO.append(int(faces[0]))
-                        faceListO.append(int(0))
-                    line = file.readline()
         self.vertexList = vertexListO
         self.faceList = faceListO
 

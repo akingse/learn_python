@@ -1,6 +1,7 @@
 import sys
 import os
 mypath = r'D:\Alluser\learn_python'  # fixed path
+mypath=r'C:\Users\Aking\source\repos\learn_python'
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
 
@@ -73,7 +74,7 @@ def GenerateProfileDebug(i: int):  #绘制指定三角面
 
 # 网格法过滤
 def projectionPolyfaceToMakeFilterD(i: int):  #绘制指定三角面
-    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyfaceToMakeFilterD")(i)
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT,  "projectionPolyfaceToMakeFilterPython")(i)
 
 
 projectionPolyfaceToMakeFilterD(1)

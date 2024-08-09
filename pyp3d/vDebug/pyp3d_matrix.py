@@ -496,7 +496,7 @@ def is_two_dimensional_matrix(M: GeTransform) -> bool:
     pos = get_matrixs_position(M)
     if abs(pos.z) > PL_A:
         return False
-    if abs(dot(vecx, g_axisZ)) > PL_A or abs(dot(vecy, g_axisZ)) > PL_A:
+    if abs(dot(vecx, g_axisZ)) > PL_E6 or abs(dot(vecy, g_axisZ)) > PL_E6:
         return False
     return True
 

@@ -5,6 +5,10 @@ mypath=r'C:\Users\Aking\source\repos\learn_python'
 sys.path.append(os.path.join(os.path.dirname(__file__), mypath))
 from pyp3d import *  # NOQA: E402
 
+#清空所有model所有entity，SDK临时封装
+def clear_all_entity(i:int=0):
+    return UnifiedFunction(PARACMPT_PARAMETRIC_COMPONENT, "CLEAR_ALL_ENTITY")(i)
+
 # 生成遮挡模型
 sec1=scale(10)*Section(Arc())
 sec2=rectangle_diagonal(Vec3(),Vec3(20,20))
@@ -50,7 +54,7 @@ com=Combine(trans(-150,400,0)*scale(300)*Cube())
 
 # 在建筑环境测试
 file=r'C:\Users\Aking\source\repos\bimbase\Bin\Release\OutputGraphicsToJson\\'
-# js=JsonRead(file+'Graphics1.Json')
+js=JsonRead(file+'Graphics2.Json')
 # js.write_python_code()
 
 section=Section(Vec3(23450.00201413668,11299.999999999984,8950.0),
@@ -70,7 +74,22 @@ section=Section(
     Vec3(49.999999998914745,54650.00000000931,18350),
     Vec3(49.99999999888678,54950.00000000931,18350),)
 swept0=transz(-20)*rotate_arbitrary(Vec3(49.99999999888371,54950.00000000931,17850),Vec3(0,1,0),-0.005)*Swept(section, Vec3(14000.0,0.0,0.0),) 
-create_geometry(swept0)
+# create_geometry(swept0)
+
+
+section=rectangle_diagonal(Vec2(-31000.0,-32000.0,),
+                           Vec2(38000.0,32000.0,),1000)
+swept0=transz(-20)*Swept(section, Vec3(0.0,0.0,100),)
+id=create_geometry(swept0)
+
+# delete_one_entity(id)
+
+# combine=Combine()
+# for i in range(2):
+#     create_geometry(trans(6500*i,0)*combine)
+#     create_geometry(trans(6500*i,31000)*combine)
+#     create_geometry(trans(6500*i,0)*mirror_xoz()*combine)
+#     create_geometry(mirror_xoz()*trans(6500*i,31000)*combine)
 
 
 

@@ -23,7 +23,6 @@ box2=trans(150,-20,30)*scale(150,20,60)*Cube() #遮挡box
 box3=trans(180,-50,50)*scale(150,100,20)*Cube() #互相遮挡
 # create_geometry(box2)
 # create_geometry(box2)
-get_discrete_points_from_spline
 
 mesh1=scale(100)*Cube()-trans(50,50)*scale(100)*Cube()
 mesh2=trans(50,0)*scale(100)*Cube()-trans(0,50)*scale(100)*Cube()
@@ -80,7 +79,9 @@ swept0=transz(-20)*rotate_arbitrary(Vec3(49.99999999888371,54950.00000000931,178
 section=rectangle_diagonal(Vec2(-31000.0,-32000.0,),
                            Vec2(38000.0,32000.0,),1000)
 swept0=transz(-20)*Swept(section, Vec3(0.0,0.0,100),)
-id=create_geometry(swept0)
+# id=create_geometry(swept0)
+
+create_geometry(scale(10)*Cone())
 
 # delete_one_entity(id)
 

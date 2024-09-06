@@ -30,6 +30,7 @@ geo = loft_different(sec1, sec2)
 # create_geometry(sec2)
 # create_geometry(geo)
 
+# 函数接口测试-python version
 # 三角形和包围盒相交
 
 mat = roty()  # pi/4
